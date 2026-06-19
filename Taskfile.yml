@@ -3,16 +3,16 @@ version: '3'
 vars:
   APP_NAME: "obsi-conf-sync"
   BIN_DIR: "bin"
-  PACKAGE_MANAGER: '{{.PACKAGE_MANAGER | default "npm"}}'
+  PACKAGE_MANAGER: '{{.PACKAGE_MANAGER | default "pnpm"}}'
   VITE_PORT: '{{.WAILS_VITE_PORT | default 9245}}'
 
 includes:
   common: ./build/Taskfile.yml
   windows: ./build/windows/Taskfile.yml
-  darwin: ./build/darwin/Taskfile.yml
-  linux: ./build/linux/Taskfile.yml
-  ios: ./build/ios/Taskfile.yml
-  android: ./build/android/Taskfile.yml
+  # darwin: ./build/darwin/Taskfile.yml
+  # linux: ./build/linux/Taskfile.yml
+  # ios: ./build/ios/Taskfile.yml
+  # android: ./build/android/Taskfile.yml
 
 tasks:
   build:
