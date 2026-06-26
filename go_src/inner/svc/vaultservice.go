@@ -61,7 +61,7 @@ func precheckScanRoot(root string) (string, error) {
 	return rootPath, nil
 }
 
-// scanVaultRoot 扫描 root 本身或 root 的一级子目录。
+// scanVaultRoot 扫描 root 本身或 root 的最多 2 层子目录。
 func scanVaultRoot(rootPath string) ([]VaultInfo, error) {
 	isVault, err := isVaultDir(rootPath)
 	if err != nil {
@@ -74,12 +74,25 @@ func scanVaultRoot(rootPath string) ([]VaultInfo, error) {
 		}}, nil
 	}
 
-	entries, err := os.ReadDir(rootPath)
+	vaults := make([]VaultInfo, 0)
+	err = scanVaultChildren(rootPath, 2, &vaults)
 	if err != nil {
 		return nil, err
 	}
+	return vaults, nil
+}
 
-	vaults := make([]VaultInfo, 0)
+// scanVaultChildren 扫描子目录，remainDepth 表示还允许向下检查的层数。
+func scanVaultChildren(parentPath string, remainDepth int, vaults *[]VaultInfo) error {
+	if remainDepth <= 0 {
+		return nil
+	}
+
+	entries, err := os.ReadDir(parentPath)
+	if err != nil {
+		return err
+	}
+
 	for _, entry := range entries {
 		if !entry.IsDir() {
 			continue
@@ -88,19 +101,24 @@ func scanVaultRoot(rootPath string) ([]VaultInfo, error) {
 			continue
 		}
 
-		childPath := filepath.Join(rootPath, entry.Name())
+		childPath := filepath.Join(parentPath, entry.Name())
 		isVault, err := isVaultDir(childPath)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		if isVault {
-			vaults = append(vaults, VaultInfo{
+			*vaults = append(*vaults, VaultInfo{
 				Path: childPath,
 				Name: entry.Name(),
 			})
+			continue
+		}
+
+		if err := scanVaultChildren(childPath, remainDepth-1, vaults); err != nil {
+			return err
 		}
 	}
-	return vaults, nil
+	return nil
 }
 
 // isVaultDir 判断目录是否为 Obsidian vault。
