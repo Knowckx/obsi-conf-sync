@@ -2,8 +2,8 @@ package infa
 
 import (
 	"fmt"
-	"go_trade/src/infa/ops"
 	"math"
+	"obsi-conf-sync/go_src/infa/ops"
 )
 
 // PeekSlice 默认预览3行数据
