@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"obsi-conf-sync/go_src/inner/svc"
 
 	"log"
 	"time"
@@ -38,7 +39,7 @@ func main() {
 		Name:        "obsi-conf-sync",
 		Description: "A demo of using raw HTML & CSS",
 		Services: []application.Service{
-			application.NewService(&GreetService{}),
+			application.NewService(&svc.GreetService{}),
 		},
 		Assets: application.AssetOptions{
 			Handler: application.AssetFileServerFS(assets),

@@ -1,6 +1,6 @@
-module changeme
+module obsi-conf-sync
 
-go 1.25.0
+go 1.26.2
 
 require github.com/wailsapp/wails/v3 v3.0.0-alpha2.104
 
