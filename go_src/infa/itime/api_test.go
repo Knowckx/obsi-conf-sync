@@ -1,8 +1,8 @@
 package itime
 
 import (
+	"go_trade/src/infa/ops"
 	"log"
-	"obsi-conf-sync/go_src/infa/ops"
 	"testing"
 )
 

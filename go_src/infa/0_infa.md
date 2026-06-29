@@ -7,11 +7,7 @@
 查找 Go 项目根目录。  
 `root, err := infa.FindProjectRoot()`
 
-初始化场景遇错立即失败。  
-`ops.MustNoErr(err)`
 
-测试场景断言 error 为空。  
-`ops.MustNoErrInTest(t, err)`
 
 注册退出清理函数。  
 `err := infa.RegisterCleanup("grpc client", cleanFn)`

@@ -4,6 +4,7 @@ go 1.26.2
 
 require (
 	github.com/cockroachdb/errors v1.13.0
+	github.com/pelletier/go-toml/v2 v2.4.2
 	github.com/wailsapp/wails/v3 v3.0.0-alpha2.104
 )
 

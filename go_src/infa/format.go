@@ -2,13 +2,29 @@ package infa
 
 import (
 	"fmt"
+	"go_trade/src/infa/ops"
 	"math"
-	"obsi-conf-sync/go_src/infa/ops"
 )
+
+// PeekStr 输出字符串长度和前缀预览。
+func PeekStr(dataStr string) string {
+	const limit = 30
+
+	runes := []rune(dataStr)
+	if len(runes) <= limit {
+		return fmt.Sprintf("len=%d %s", len(dataStr), dataStr)
+	}
+
+	return fmt.Sprintf("len=%d %s...", len(dataStr), string(runes[:limit]))
+}
 
 // PeekSlice 默认预览3行数据
 func PeekSlice[T any](ins []T) string {
 	return PeekSliceN(ins, 3, "\n")
+}
+
+func PeekSliceFull[T any](ins []T) string {
+	return PeekSliceN(ins, len(ins), "\n")
 }
 
 // PeekSliceN(lis, 5, " | ")   自定义数量和分隔符
@@ -19,6 +35,10 @@ func PeekSliceN[T any](ins []T, n int, sep string) string {
 	out.Addf("len=%d", len(ins))
 
 	for i := range n {
+		if sep == "\n"{
+			out.Addf("%d %v", i, ins[i])
+			continue
+		}
 		out.Addf("%v", ins[i])
 	}
 
