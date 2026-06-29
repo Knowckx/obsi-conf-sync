@@ -1,8 +1,8 @@
 package template
 
 import (
-	"go_trade/src/infa"
-	"go_trade/src/inner/log2/mylog"
+	"log"
+	"obsi-conf-sync/go_src/infa"
 
 	"github.com/cockroachdb/errors"
 )
@@ -38,7 +38,7 @@ func (t *exampleCache) Refresh(keys []string) error {
 		}
 	}
 
-	mylog.Printf("✅ Cache example, load keys %s", infa.PeekSlice(keys))
+	log.Printf("✅ Cache example, load keys %s", infa.PeekSlice(keys))
 	return nil
 }
 
@@ -73,6 +73,7 @@ func (t *exampleCache) Get(key string) (*ExampleCacheData, error) {
 
 // todo 
 func (t *exampleCache) todo_LoadData(key string) (*ExampleCacheData, error) {
+	_ = key
 	return nil, nil
 }
 

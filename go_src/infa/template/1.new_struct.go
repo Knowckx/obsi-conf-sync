@@ -2,7 +2,7 @@ package template
 
 import (
 	"fmt"
-	"go_trade/src/infa"
+	"obsi-conf-sync/go_src/infa"
 )
 
 // struct Template v1.0

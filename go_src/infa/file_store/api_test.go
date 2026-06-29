@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"go_trade/src/infa/ops"
+	"obsi-conf-sync/go_src/infa/ops"
 )
 
 type testConfigItem struct {

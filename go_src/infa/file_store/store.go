@@ -1,7 +1,7 @@
 package file_store
 
 import (
-	"go_trade/src/inner/log2/mylog"
+	"log"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -39,7 +39,7 @@ func newStore(softName string, fileName string) (*Store, error) {
 	if err := file.Close(); err != nil {
 		return nil, err
 	}
-	mylog.Printf("file store path: %+v", storePath)
+	log.Printf("file store path: %+v", storePath)
 	return &Store{path: storePath}, nil
 }
 

@@ -2,8 +2,8 @@ package infa
 
 import (
 	"fmt"
-	"go_trade/src/infa/ops"
 	"math"
+	"obsi-conf-sync/go_src/infa/ops"
 )
 
 // PeekStr 输出字符串长度和前缀预览。
