@@ -1,11 +1,10 @@
 <script>
 import { Dialogs } from '@wailsio/runtime';
-import { Button, Card, ContentShell, Input, PanelBg } from 'infa-s5';
+import { Button, Input } from 'infa-s5';
 import { VaultService } from '../../bindings/obsi-conf-sync/go_src/inner/svc';
 import VaultList from '@/lib/components/VaultList.svelte';
 
-let vaults = $state([]);
-let root = $state('');
+let { root = '', vaults = [], onScanned = () => {} } = $props();
 let error = $state('');
 let scanning = $state(false);
 
@@ -22,39 +21,40 @@ const chooseAndScan = async () => {
     return;
   }
 
-  root = selected;
   scanning = true;
   try {
-    vaults = await VaultService.ScanVaults(selected);
+    const foundVaults = await VaultService.ScanVaults(selected);
+    onScanned(selected, foundVaults);
   } catch (err) {
     error = err?.message ?? String(err);
-    vaults = [];
+    onScanned(selected, []);
   } finally {
     scanning = false;
   }
 };
 </script>
 
-<PanelBg>
-  <ContentShell maxWidth="max-w-4xl">
-    <Card>
-      <div class="toolbar">
-        <Button onclick={chooseAndScan} disabled={scanning}>
-          {scanning ? '扫描中' : '选择目录'}
-        </Button>
-        <Input value={root} readonly placeholder="未选择目录" />
-      </div>
+<div class="scan-vaults">
+  <div class="toolbar">
+    <Button onclick={chooseAndScan} disabled={scanning}>
+      {scanning ? '扫描中' : '选择目录'}
+    </Button>
+    <Input value={root} readonly placeholder="未选择目录" />
+  </div>
 
-      {#if error}
-        <p class="error">{error}</p>
-      {/if}
+  {#if error}
+    <p class="error">{error}</p>
+  {/if}
 
-      <VaultList {vaults} />
-    </Card>
-  </ContentShell>
-</PanelBg>
+  <VaultList {vaults} />
+</div>
 
 <style>
+  .scan-vaults {
+    display: grid;
+    gap: 16px;
+  }
+
   .toolbar {
     display: grid;
     grid-template-columns: max-content minmax(0, 1fr);

@@ -1,9 +1,9 @@
 <script>
-import ScanVaults from './pages/ScanVaults.svelte';
+import SyncWizard from './pages/SyncWizard.svelte';
 </script>
 
 <main>
-  <ScanVaults />
+  <SyncWizard />
 </main>
 
 <style>
