@@ -40,7 +40,7 @@ const chooseAndScan = async () => {
     <Card>
       <div class="toolbar">
         <Button onclick={chooseAndScan} disabled={scanning}>
-          {scanning ? '扫描中' : '选择目录并扫描'}
+          {scanning ? '扫描中' : '选择目录'}
         </Button>
         <Input value={root} readonly placeholder="未选择目录" />
       </div>
