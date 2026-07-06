@@ -4,7 +4,7 @@ vars:
   APP_NAME: "obsi-conf-sync"
   BIN_DIR: "bin"
   PACKAGE_MANAGER: '{{.PACKAGE_MANAGER | default "pnpm"}}'
-  VITE_PORT: '{{.WAILS_VITE_PORT | default 9245}}'
+  VITE_PORT: '{{.WAILS_VITE_PORT | default 33005}}'
 
 includes:
   common: ./build/Taskfile.yml

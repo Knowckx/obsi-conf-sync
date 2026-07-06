@@ -1,7 +1,8 @@
 <script>
 import { Dialogs } from '@wailsio/runtime';
+import { Button, Card, ContentShell, Input, PanelBg } from 'infa-s5';
 import { VaultService } from '../../bindings/obsi-conf-sync/go_src/inner/svc';
-import VaultList from '../components/VaultList.svelte';
+import VaultList from '@/lib/components/VaultList.svelte';
 
 let vaults = $state([]);
 let root = $state('');
@@ -34,47 +35,31 @@ const chooseAndScan = async () => {
 };
 </script>
 
-<section class="scan-view">
-  <div class="toolbar">
-    <button onclick={chooseAndScan} disabled={scanning}>
-      {scanning ? '扫描中' : '选择目录并扫描'}
-    </button>
-    <input value={root} readonly placeholder="未选择目录" />
-  </div>
+<PanelBg>
+  <ContentShell maxWidth="max-w-4xl">
+    <Card>
+      <div class="toolbar">
+        <Button onclick={chooseAndScan} disabled={scanning}>
+          {scanning ? '扫描中' : '选择目录并扫描'}
+        </Button>
+        <Input value={root} readonly placeholder="未选择目录" />
+      </div>
 
-  {#if error}
-    <p class="error">{error}</p>
-  {/if}
+      {#if error}
+        <p class="error">{error}</p>
+      {/if}
 
-  <VaultList {vaults} />
-</section>
+      <VaultList {vaults} />
+    </Card>
+  </ContentShell>
+</PanelBg>
 
 <style>
-  .scan-view {
-    display: grid;
-    gap: 16px;
-    padding: 24px;
-  }
-
   .toolbar {
     display: grid;
     grid-template-columns: max-content minmax(0, 1fr);
     gap: 12px;
     align-items: center;
-  }
-
-  button,
-  input {
-    height: 36px;
-  }
-
-  button {
-    padding: 0 14px;
-  }
-
-  input {
-    min-width: 0;
-    padding: 0 10px;
   }
 
   .error {

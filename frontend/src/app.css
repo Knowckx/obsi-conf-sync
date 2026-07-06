@@ -1,0 +1,6 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* 手动添加这一行来扫描 infa-s5 的组件 | 推荐使用相对路径 */
+@source "../node_modules/infa-s5/dist";
+

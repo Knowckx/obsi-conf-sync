@@ -1,5 +1,5 @@
 <script>
-import ScanVaults from './views/ScanVaults.svelte';
+import ScanVaults from './pages/ScanVaults.svelte';
 </script>
 
 <main>
