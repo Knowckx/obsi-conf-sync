@@ -15,52 +15,32 @@ includes:
   # android: ./build/android/Taskfile.yml
 
 tasks:
-  build:
-    summary: Builds the application
-    cmds:
-      - task: "{{OS}}:build"
-
-  package:
-    summary: Packages a production build of the application
-    cmds:
-      - task: "{{OS}}:package"
-
-  run:
-    summary: Runs the application
-    cmds:
-      - task: "{{OS}}:run"
-
   dev:
-    summary: Runs the application in development mode
+    summary: 开发模式启动 Wails
     cmds:
       - wails3 dev -config ./build/config.yml -port {{.VITE_PORT}}
 
   bindings:
-    summary: Generates Wails frontend bindings
+    summary: 重新生成 Wails 前端绑定
     cmds:
       - wails3 generate bindings -ts
 
+  build:
+    summary: 构建当前系统版本，Windows 下转到 windows:build
+    cmds:
+      - task: "{{OS}}:build"
+
+  package:
+    summary: 打生产安装包，Windows 下默认生成 NSIS 安装器
+    cmds:
+      - task: "{{OS}}:package"
+
+  run:
+    summary: 运行已构建的程序，Windows 下是 bin/obsi-conf-sync.exe
+    cmds:
+      - task: "{{OS}}:run"
+
   setup:docker:
-    summary: Builds Docker image for cross-compilation (~800MB download)
+    summary: 构建跨平台编译用 Docker 镜像 wails-cross
     cmds:
       - task: common:setup:docker
-
-  build:server:
-    summary: Builds the application in server mode (no GUI, HTTP server only)
-    cmds:
-      - task: common:build:server
-
-  run:server:
-    summary: Runs the application in server mode
-    cmds:
-      - task: common:run:server
-
-  build:docker:
-    summary: Builds a Docker image for server mode deployment
-    cmds:
-      - task: common:build:docker
-
-  run:docker:
-    summary: Builds and runs the Docker image
-    cmds:
-      - task: common:run:docker
