@@ -1,10 +1,16 @@
-<script>
+<script lang="ts">
 import { Dialogs } from '@wailsio/runtime';
 import { Button, Input } from 'infa-s5';
-import { VaultService } from '../../bindings/obsi-conf-sync/go_src/inner/svc';
+import { scanVaults, type VaultInfo } from '@/lib/api/vault_service';
 import VaultList from '@/lib/components/VaultList.svelte';
 
-let { root = '', vaults = [], onScanned = () => {} } = $props();
+type Props = {
+  root?: string;
+  vaults?: VaultInfo[];
+  onScanned?: (root: string, vaults: VaultInfo[]) => void;
+};
+
+let { root = '', vaults = [], onScanned = () => {} }: Props = $props();
 let error = $state('');
 let scanning = $state(false);
 
@@ -23,14 +29,18 @@ const chooseAndScan = async () => {
 
   scanning = true;
   try {
-    const foundVaults = await VaultService.ScanVaults(selected);
+    const foundVaults = await scanVaults(selected);
     onScanned(selected, foundVaults);
   } catch (err) {
-    error = err?.message ?? String(err);
+    error = getErrMsg(err);
     onScanned(selected, []);
   } finally {
     scanning = false;
   }
+};
+
+const getErrMsg = (err: unknown): string => {
+  return err instanceof Error ? err.message : String(err);
 };
 </script>
 

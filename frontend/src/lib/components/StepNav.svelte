@@ -1,5 +1,15 @@
-<script>
-let { steps = [], currentKey = '' } = $props();
+<script lang="ts">
+type Step = {
+  key: string;
+  label: string;
+};
+
+type Props = {
+  steps?: Step[];
+  currentKey?: string;
+};
+
+let { steps = [], currentKey = '' }: Props = $props();
 </script>
 
 <nav class="step-nav" aria-label="同步步骤">

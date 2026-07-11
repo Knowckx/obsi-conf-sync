@@ -12,9 +12,10 @@ export default defineConfig({
         wails("./bindings")
     ],
     resolve: {
-        alias: {
-            '@': resolve(process.cwd(), 'src')
-        }
+        alias: [
+            { find: '@/bindings', replacement: resolve(process.cwd(), 'bindings') },
+            { find: '@', replacement: resolve(process.cwd(), 'src') }
+        ]
     },
     // ✅ 必须 - 禁用客户端预构建本地包的缓存
     optimizeDeps: {

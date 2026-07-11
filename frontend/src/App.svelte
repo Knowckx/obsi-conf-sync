@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 import SyncWizard from './pages/SyncWizard.svelte';
 </script>
 

@@ -1,5 +1,14 @@
-<script>
+<script lang="ts">
+import type { VaultInfo } from '@/lib/api/vault_service';
 import VaultList from '@/lib/components/VaultList.svelte';
+
+type Props = {
+  vaults?: VaultInfo[];
+  mainVault?: VaultInfo | null;
+  targetVaults?: VaultInfo[];
+  onMainChange?: (vault: VaultInfo) => void;
+  onTargetToggle?: (vault: VaultInfo) => void;
+};
 
 let {
   vaults = [],
@@ -7,7 +16,7 @@ let {
   targetVaults = [],
   onMainChange = () => {},
   onTargetToggle = () => {},
-} = $props();
+}: Props = $props();
 </script>
 
 <div class="select-vaults">

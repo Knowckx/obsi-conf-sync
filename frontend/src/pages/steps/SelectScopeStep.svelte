@@ -1,6 +1,19 @@
-<script>
+<script lang="ts">
 import { Button } from 'infa-s5';
-import { VaultService } from '../../../bindings/obsi-conf-sync/go_src/inner/svc';
+import {
+  listConfigItems,
+  openVaultConfigDir,
+  type ConfigItem,
+  type VaultInfo,
+} from '@/lib/api/vault_service';
+
+type Props = {
+  mainVault?: VaultInfo | null;
+  configItems?: ConfigItem[];
+  selectedPaths?: string[];
+  onConfigItemsChange?: (items: ConfigItem[]) => void;
+  onSelectedPathsChange?: (paths: string[]) => void;
+};
 
 let {
   mainVault = null,
@@ -8,7 +21,7 @@ let {
   selectedPaths = [],
   onConfigItemsChange = () => {},
   onSelectedPathsChange = () => {},
-} = $props();
+}: Props = $props();
 
 let error = $state('');
 let loading = $state(false);
@@ -28,22 +41,23 @@ const loadConfigItems = async () => {
 
   error = '';
   loading = true;
-  loadedVaultPath = mainVault.path;
+  const vaultPath = mainVault.path;
+  loadedVaultPath = vaultPath;
 
   try {
-    const items = await VaultService.ListConfigItems(mainVault.path);
+    const items = await listConfigItems(vaultPath);
     onConfigItemsChange(items);
     if (selectedPaths.length === 0) {
       onSelectedPathsChange(items.filter(isDefaultSelected).map((item) => item.path));
     }
   } catch (err) {
-    error = err?.message ?? String(err);
+    error = getErrMsg(err);
   } finally {
     loading = false;
   }
 };
 
-const togglePath = (path) => {
+const togglePath = (path: string) => {
   const exists = selectedPaths.includes(path);
   onSelectedPathsChange(
     exists ? selectedPaths.filter((item) => item !== path) : [...selectedPaths, path],
@@ -65,15 +79,19 @@ const openConfigDir = async () => {
 
   error = '';
   try {
-    await VaultService.OpenVaultConfigDir(mainVault.path);
+    await openVaultConfigDir(mainVault.path);
   } catch (err) {
-    error = err?.message ?? String(err);
+    error = getErrMsg(err);
   }
 };
 
-function isDefaultSelected(item) {
+function isDefaultSelected(item: ConfigItem): boolean {
   return item.path.includes('/') || !item.path.startsWith('workspace');
 }
+
+const getErrMsg = (err: unknown): string => {
+  return err instanceof Error ? err.message : String(err);
+};
 </script>
 
 <div class="select-scope">

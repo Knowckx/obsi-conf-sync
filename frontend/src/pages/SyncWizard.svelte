@@ -1,11 +1,19 @@
-<script>
+<script lang="ts">
 import { Button, Card, ContentShell, PanelBg } from 'infa-s5';
+import type { ConfigItem, VaultInfo } from '@/lib/api/vault_service';
 import ScanVaults from './ScanVaults.svelte';
 import SelectScopeStep from './steps/SelectScopeStep.svelte';
 import SelectVaultsStep from './steps/SelectVaultsStep.svelte';
 import StepNav from '@/lib/components/StepNav.svelte';
 
-const steps = [
+type StepKey = 'scan' | 'vaults' | 'scope' | 'plan' | 'result';
+
+type WizardStep = {
+  key: StepKey;
+  label: string;
+};
+
+const steps: WizardStep[] = [
   { key: 'scan', label: '扫描库' },
   { key: 'vaults', label: '选择库' },
   { key: 'scope', label: '同步范围' },
@@ -15,17 +23,17 @@ const steps = [
 
 let stepIndex = $state(0);
 let root = $state('');
-let vaults = $state([]);
-let mainVault = $state(null);
-let targetVaults = $state([]);
-let configItems = $state([]);
-let selectedPaths = $state([]);
+let vaults = $state<VaultInfo[]>([]);
+let mainVault = $state<VaultInfo | null>(null);
+let targetVaults = $state<VaultInfo[]>([]);
+let configItems = $state<ConfigItem[]>([]);
+let selectedPaths = $state<string[]>([]);
 
-let currentStep = $derived(steps[stepIndex]);
+let currentStep = $derived(steps[stepIndex]!);
 let canBack = $derived(stepIndex > 0);
 let canNext = $derived(getCanNext());
 
-const setScannedVaults = (selectedRoot, foundVaults) => {
+const setScannedVaults = (selectedRoot: string, foundVaults: VaultInfo[]) => {
   root = selectedRoot;
   const vaultMap = new Map(vaults.map((vault) => [vault.path, vault]));
   for (const vault of foundVaults) {
@@ -34,14 +42,14 @@ const setScannedVaults = (selectedRoot, foundVaults) => {
   vaults = [...vaultMap.values()];
 };
 
-const setMainVault = (vault) => {
+const setMainVault = (vault: VaultInfo) => {
   mainVault = vault;
   targetVaults = vaults.filter((item) => item.path !== vault.path);
   configItems = [];
   selectedPaths = [];
 };
 
-const toggleTargetVault = (vault) => {
+const toggleTargetVault = (vault: VaultInfo) => {
   if (mainVault?.path === vault.path) {
     return;
   }
@@ -64,13 +72,13 @@ const goNext = () => {
   }
 };
 
-function getCanNext() {
+function getCanNext(): boolean {
   if (currentStep.key === 'scan') {
     return vaults.length > 0;
   }
 
   if (currentStep.key === 'vaults') {
-    return mainVault && targetVaults.length > 0;
+    return Boolean(mainVault && targetVaults.length > 0);
   }
 
   if (currentStep.key === 'scope') {

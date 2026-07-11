@@ -1,4 +1,15 @@
-<script>
+<script lang="ts">
+import type { VaultInfo } from '@/lib/api/vault_service';
+
+type Props = {
+  vaults?: VaultInfo[];
+  mode?: 'read' | 'select';
+  mainVault?: VaultInfo | null;
+  targetVaults?: VaultInfo[];
+  onMainChange?: (vault: VaultInfo) => void;
+  onTargetToggle?: (vault: VaultInfo) => void;
+};
+
 let {
   vaults = [],
   mode = 'read',
@@ -6,10 +17,10 @@ let {
   targetVaults = [],
   onMainChange = () => {},
   onTargetToggle = () => {},
-} = $props();
+}: Props = $props();
 
-const isMainVault = (vault) => mainVault?.path === vault.path;
-const isTargetVault = (vault) => targetVaults.some((item) => item.path === vault.path);
+const isMainVault = (vault: VaultInfo) => mainVault?.path === vault.path;
+const isTargetVault = (vault: VaultInfo) => targetVaults.some((item) => item.path === vault.path);
 </script>
 
 {#if vaults.length === 0}
