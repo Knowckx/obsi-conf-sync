@@ -16,16 +16,38 @@ import { Call as $Call, CancellablePromise as $CancellablePromise, Create as $Cr
 import * as $models from "./models.js";
 
 /**
+ * ListConfigItems 列出 vault 的 .obsidian 下可选择同步的配置项。
+ * @param {string} vaultPath
+ * @returns {$CancellablePromise<$models.ConfigItem[]>}
+ */
+export function ListConfigItems(vaultPath) {
+    return $Call.ByID(3677850622, vaultPath).then(/** @type {($result: any) => any} */(($result) => {
+        return $$createType1($result);
+    }));
+}
+
+/**
+ * OpenVaultConfigDir 使用系统文件管理器打开 vault 的 .obsidian 配置目录。
+ * @param {string} vaultPath
+ * @returns {$CancellablePromise<void>}
+ */
+export function OpenVaultConfigDir(vaultPath) {
+    return $Call.ByID(132513533, vaultPath);
+}
+
+/**
  * ScanVaults 扫描 root 并返回包含 .obsidian/ 的目录。
  * @param {string} root
  * @returns {$CancellablePromise<$models.VaultInfo[]>}
  */
 export function ScanVaults(root) {
     return $Call.ByID(4174715004, root).then(/** @type {($result: any) => any} */(($result) => {
-        return $$createType1($result);
+        return $$createType3($result);
     }));
 }
 
 // Private type creation functions
-const $$createType0 = $models.VaultInfo.createFrom;
+const $$createType0 = $models.ConfigItem.createFrom;
 const $$createType1 = $Create.Array($$createType0);
+const $$createType2 = $models.VaultInfo.createFrom;
+const $$createType3 = $Create.Array($$createType2);

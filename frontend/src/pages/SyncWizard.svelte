@@ -1,6 +1,7 @@
 <script>
 import { Button, Card, ContentShell, PanelBg } from 'infa-s5';
 import ScanVaults from './ScanVaults.svelte';
+import SelectScopeStep from './steps/SelectScopeStep.svelte';
 import SelectVaultsStep from './steps/SelectVaultsStep.svelte';
 import StepNav from '@/lib/components/StepNav.svelte';
 
@@ -17,6 +18,8 @@ let root = $state('');
 let vaults = $state([]);
 let mainVault = $state(null);
 let targetVaults = $state([]);
+let configItems = $state([]);
+let selectedPaths = $state([]);
 
 let currentStep = $derived(steps[stepIndex]);
 let canBack = $derived(stepIndex > 0);
@@ -34,6 +37,8 @@ const setScannedVaults = (selectedRoot, foundVaults) => {
 const setMainVault = (vault) => {
   mainVault = vault;
   targetVaults = vaults.filter((item) => item.path !== vault.path);
+  configItems = [];
+  selectedPaths = [];
 };
 
 const toggleTargetVault = (vault) => {
@@ -68,6 +73,10 @@ function getCanNext() {
     return mainVault && targetVaults.length > 0;
   }
 
+  if (currentStep.key === 'scope') {
+    return selectedPaths.length > 0;
+  }
+
   return false;
 }
 </script>
@@ -91,6 +100,10 @@ function getCanNext() {
             <span>已发现</span>
             <strong>{vaults.length}</strong>
           </div>
+          <div>
+            <span>同步项</span>
+            <strong>{selectedPaths.length}</strong>
+          </div>
         </div>
 
         <section class="step-body">
@@ -103,6 +116,14 @@ function getCanNext() {
               {targetVaults}
               onMainChange={setMainVault}
               onTargetToggle={toggleTargetVault}
+            />
+          {:else if currentStep.key === 'scope'}
+            <SelectScopeStep
+              {mainVault}
+              {configItems}
+              {selectedPaths}
+              onConfigItemsChange={(items) => (configItems = items)}
+              onSelectedPathsChange={(paths) => (selectedPaths = paths)}
             />
           {:else}
             <div class="pending-step">
@@ -130,7 +151,7 @@ function getCanNext() {
 
   .summary {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 12px;
     margin-bottom: 20px;
   }

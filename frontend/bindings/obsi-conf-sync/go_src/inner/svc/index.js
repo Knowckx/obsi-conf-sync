@@ -8,5 +8,6 @@ export {
 };
 
 export {
+    ConfigItem,
     VaultInfo
 } from "./models.js";

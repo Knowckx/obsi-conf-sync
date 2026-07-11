@@ -3,7 +3,9 @@ package svc
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"obsi-conf-sync/go_src/conf"
@@ -18,6 +20,13 @@ type VaultService struct{}
 type VaultInfo struct {
 	Path string `json:"path"`
 	Name string `json:"name"`
+}
+
+// ConfigItem 表示 .obsidian 下可同步的配置项。
+type ConfigItem struct {
+	Path  string `json:"path"`
+	Name  string `json:"name"`
+	IsDir bool   `json:"isDir"`
 }
 
 // String 返回 vault 的简短展示文本。
@@ -40,6 +49,34 @@ func (s *VaultService) ScanVaults(root string) ([]VaultInfo, error) {
 	return vaults, nil
 }
 
+// ListConfigItems 列出 vault 的 .obsidian 下可选择同步的配置项。
+func (s *VaultService) ListConfigItems(vaultPath string) ([]ConfigItem, error) {
+	rootPath, err := precheckVaultPath(vaultPath)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	items, err := listConfigItems(filepath.Join(rootPath, ".obsidian"))
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	return items, nil
+}
+
+// OpenVaultConfigDir 使用系统文件管理器打开 vault 的 .obsidian 配置目录。
+func (s *VaultService) OpenVaultConfigDir(vaultPath string) error {
+	rootPath, err := precheckVaultPath(vaultPath)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	err = openDir(filepath.Join(rootPath, ".obsidian"))
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	return nil
+}
+
 // precheckScanRoot 检查扫描根目录并返回绝对路径。
 func precheckScanRoot(root string) (string, error) {
 	if strings.TrimSpace(root) == "" {
@@ -57,6 +94,23 @@ func precheckScanRoot(root string) (string, error) {
 	}
 	if !info.IsDir() {
 		return "", errors.Errorf("root 不是目录: %s", rootPath)
+	}
+	return rootPath, nil
+}
+
+// precheckVaultPath 检查 vault 路径并返回绝对路径。
+func precheckVaultPath(vaultPath string) (string, error) {
+	rootPath, err := precheckScanRoot(vaultPath)
+	if err != nil {
+		return "", err
+	}
+
+	isVault, err := isVaultDir(rootPath)
+	if err != nil {
+		return "", err
+	}
+	if !isVault {
+		return "", errors.Errorf("不是 Obsidian vault: %s", rootPath)
 	}
 	return rootPath, nil
 }
@@ -119,6 +173,76 @@ func scanVaultChildren(parentPath string, remainDepth int, vaults *[]VaultInfo) 
 		}
 	}
 	return nil
+}
+
+// listConfigItems 列出 .obsidian 根目录配置项和插件目录。
+func listConfigItems(obsidianPath string) ([]ConfigItem, error) {
+	entries, err := os.ReadDir(obsidianPath)
+	if err != nil {
+		return nil, err
+	}
+
+	items := make([]ConfigItem, 0)
+	for _, entry := range entries {
+		if entry.Name() == "plugins" && entry.IsDir() {
+			pluginItems, err := listPluginConfigItems(obsidianPath)
+			if err != nil {
+				return nil, err
+			}
+			items = append(items, pluginItems...)
+			continue
+		}
+
+		path := entry.Name()
+		if entry.IsDir() {
+			path += "/"
+		}
+		items = append(items, ConfigItem{
+			Path:  path,
+			Name:  entry.Name(),
+			IsDir: entry.IsDir(),
+		})
+	}
+	return items, nil
+}
+
+// listPluginConfigItems 列出 .obsidian/plugins 下的插件配置目录。
+func listPluginConfigItems(obsidianPath string) ([]ConfigItem, error) {
+	pluginsPath := filepath.Join(obsidianPath, "plugins")
+	entries, err := os.ReadDir(pluginsPath)
+	if err != nil {
+		return nil, err
+	}
+
+	items := make([]ConfigItem, 0)
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			continue
+		}
+		path := filepath.ToSlash(filepath.Join("plugins", entry.Name())) + "/"
+		items = append(items, ConfigItem{
+			Path:  path,
+			Name:  entry.Name(),
+			IsDir: true,
+		})
+	}
+	return items, nil
+}
+
+// openDir 使用当前系统的文件管理器打开目录。
+func openDir(dir string) error {
+	var cmd *exec.Cmd
+	switch runtime.GOOS {
+	case "windows":
+		cmd = exec.Command("explorer", dir)
+	case "darwin":
+		cmd = exec.Command("open", dir)
+	case "linux":
+		cmd = exec.Command("xdg-open", dir)
+	default:
+		return errors.Errorf("不支持打开目录的系统: %s", runtime.GOOS)
+	}
+	return cmd.Start()
 }
 
 // isVaultDir 判断目录是否为 Obsidian vault。

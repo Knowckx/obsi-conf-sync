@@ -7,6 +7,51 @@
 import { Create as $Create } from "@wailsio/runtime";
 
 /**
+ * ConfigItem 表示 .obsidian 下可同步的配置项。
+ */
+export class ConfigItem {
+    /**
+     * Creates a new ConfigItem instance.
+     * @param {Partial<ConfigItem>} [$$source = {}] - The source object to create the ConfigItem.
+     */
+    constructor($$source = {}) {
+        if (!("path" in $$source)) {
+            /**
+             * @member
+             * @type {string}
+             */
+            this["path"] = "";
+        }
+        if (!("name" in $$source)) {
+            /**
+             * @member
+             * @type {string}
+             */
+            this["name"] = "";
+        }
+        if (!("isDir" in $$source)) {
+            /**
+             * @member
+             * @type {boolean}
+             */
+            this["isDir"] = false;
+        }
+
+        Object.assign(this, $$source);
+    }
+
+    /**
+     * Creates a new ConfigItem instance from a string or object.
+     * @param {any} [$$source = {}]
+     * @returns {ConfigItem}
+     */
+    static createFrom($$source = {}) {
+        let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
+        return new ConfigItem(/** @type {Partial<ConfigItem>} */($$parsedSource));
+    }
+}
+
+/**
  * VaultInfo 表示扫描发现的 Obsidian vault。
  */
 export class VaultInfo {
