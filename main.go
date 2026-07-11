@@ -38,13 +38,28 @@ func main() {
 		},
 	})
 
+	screen := app.Screen.GetPrimary()
+	windowWidth := 1181
+	windowHeight := 890
+	if screen != nil {
+		windowWidth = int(float64(screen.WorkArea.Width) * 0.82)
+		windowHeight = int(float64(screen.WorkArea.Height) * 0.82)
+	}
+
 	// Create a new window with the necessary options.
 	// 'Title' is the title of the window.
 	// 'Mac' options tailor the window when running on macOS.
 	// 'BackgroundColour' is the background colour of the window.
 	// 'URL' is the URL that will be loaded into the webview.
 	app.Window.NewWithOptions(application.WebviewWindowOptions{
-		Title: "Window 1",
+		Title:           "Window 1",
+		Width:           windowWidth,
+		Height:          windowHeight,
+		MinWidth:        900,
+		MinHeight:       640,
+		InitialPosition: application.WindowCentered,
+		Screen:          screen,
+		Zoom:            1.0,
 		Mac: application.MacWindow{
 			InvisibleTitleBarHeight: 50,
 			Backdrop:                application.MacBackdropTranslucent,

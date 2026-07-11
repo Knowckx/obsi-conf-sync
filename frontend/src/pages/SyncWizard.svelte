@@ -24,14 +24,16 @@ let canNext = $derived(getCanNext());
 
 const setScannedVaults = (selectedRoot, foundVaults) => {
   root = selectedRoot;
-  vaults = foundVaults;
-  mainVault = null;
-  targetVaults = [];
+  const vaultMap = new Map(vaults.map((vault) => [vault.path, vault]));
+  for (const vault of foundVaults) {
+    vaultMap.set(vault.path, vault);
+  }
+  vaults = [...vaultMap.values()];
 };
 
 const setMainVault = (vault) => {
   mainVault = vault;
-  targetVaults = targetVaults.filter((item) => item.path !== vault.path);
+  targetVaults = vaults.filter((item) => item.path !== vault.path);
 };
 
 const toggleTargetVault = (vault) => {
