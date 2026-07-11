@@ -2,7 +2,7 @@
 import { Dialogs } from '@wailsio/runtime';
 import { Button, Input } from 'infa-s5';
 import { scanVaults, type VaultInfo } from '@/lib/api/vault_service';
-import VaultList from '@/lib/components/VaultList.svelte';
+import VaultList from '@/lib/components/vault_list.svelte';
 
 type Props = {
   root?: string;

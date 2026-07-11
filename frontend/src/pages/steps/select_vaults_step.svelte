@@ -1,6 +1,6 @@
 <script lang="ts">
 import type { VaultInfo } from '@/lib/api/vault_service';
-import VaultList from '@/lib/components/VaultList.svelte';
+import VaultList from '@/lib/components/vault_list.svelte';
 
 type Props = {
   vaults?: VaultInfo[];

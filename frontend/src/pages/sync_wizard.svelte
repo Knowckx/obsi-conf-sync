@@ -1,10 +1,10 @@
 <script lang="ts">
 import { Button, Card, ContentShell, PanelBg } from 'infa-s5';
 import type { ConfigItem, VaultInfo } from '@/lib/api/vault_service';
-import ScanVaults from './ScanVaults.svelte';
-import SelectScopeStep from './steps/SelectScopeStep.svelte';
-import SelectVaultsStep from './steps/SelectVaultsStep.svelte';
-import StepNav from '@/lib/components/StepNav.svelte';
+import ScanVaults from './scan_vaults.svelte';
+import SelectScopeStep from './steps/select_scope_step.svelte';
+import SelectVaultsStep from './steps/select_vaults_step.svelte';
+import StepNav from '@/lib/components/step_nav.svelte';
 
 type StepKey = 'scan' | 'vaults' | 'scope' | 'plan' | 'result';
 
