@@ -13,7 +13,7 @@ export default defineConfig({
     ],
     resolve: {
         alias: [
-            { find: '@/bindings', replacement: resolve(process.cwd(), 'bindings') },
+            { find: '@bindings', replacement: resolve(process.cwd(), 'bindings') },
             { find: '@', replacement: resolve(process.cwd(), 'src') }
         ]
     },

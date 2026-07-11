@@ -1,5 +1,4 @@
-// @ts-ignore Wails bindings are generated JS without declaration files.
-import { VaultService } from '@/bindings/obsi-conf-sync/go_src/inner/svc';
+import { VaultService } from '@bindings/obsi-conf-sync/go_src/inner/svc';
 
 export type VaultInfo = {
   path: string;

@@ -195,7 +195,7 @@ tasks:
     cmds:
       # Bindings are generated from the Go AST; CGO is disabled so the NDK
       # is not required for this step
-      - wails3 generate bindings -f '-tags android' -clean=true
+      - wails3 generate bindings -ts -f '-tags android' -clean=true
     env:
       GOOS: android
       CGO_ENABLED: 0

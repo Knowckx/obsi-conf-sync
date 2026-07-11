@@ -38,7 +38,7 @@ tasks:
   bindings:
     summary: Generates Wails frontend bindings
     cmds:
-      - wails3 generate bindings
+      - wails3 generate bindings -ts
 
   setup:docker:
     summary: Builds Docker image for cross-compilation (~800MB download)
