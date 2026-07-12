@@ -19,7 +19,7 @@ let {
 }: Props = $props();
 </script>
 
-<div class="select-vaults">
+<div class="step-content">
   <div>
     <h2>选择主库和从库</h2>
     <p>主库配置会覆盖到选中的从库。</p>
@@ -36,17 +36,12 @@ let {
 </div>
 
 <style>
-  .select-vaults {
-    display: grid;
-    gap: 16px;
-  }
-
   h2,
   p {
     margin: 0;
   }
 
   p {
-    color: #667085;
+    color: var(--color-text-muted);
   }
 </style>

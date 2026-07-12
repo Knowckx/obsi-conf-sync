@@ -1,6 +1,7 @@
 <script lang="ts">
+import { onMount } from 'svelte';
 import { Button, Card, ContentShell, PanelBg } from 'infa-s5';
-import type { ConfigItem, VaultInfo } from '@/lib/api/vault_service';
+import { scanVaults, type ConfigItem, type VaultInfo } from '@/lib/api/vault_service';
 import ScanVaults from './scan_vaults.svelte';
 import SelectScopeStep from './steps/select_scope_step.svelte';
 import SelectVaultsStep from './steps/select_vaults_step.svelte';
@@ -28,6 +29,7 @@ let mainVault = $state<VaultInfo | null>(null);
 let targetVaults = $state<VaultInfo[]>([]);
 let configItems = $state<ConfigItem[]>([]);
 let selectedPaths = $state<string[]>([]);
+let startupError = $state('');
 
 let currentStep = $derived(steps[stepIndex]!);
 let canBack = $derived(stepIndex > 0);
@@ -48,6 +50,44 @@ const setMainVault = (vault: VaultInfo) => {
   configItems = [];
   selectedPaths = [];
 };
+
+// 开发环境按本机预设自动进入同步范围。
+const applyDevPreset = async () => {
+  if (!import.meta.env.DEV || import.meta.env.VITE_DEV_AUTO_ENTER_M3 !== 'true') {
+    return;
+  }
+
+  const devRoot = import.meta.env.VITE_DEV_VAULT_ROOT;
+  const devMainVault = import.meta.env.VITE_DEV_MAIN_VAULT;
+  if (!devRoot || !devMainVault) {
+    startupError = '开发启动预设缺少 vault 根目录或主库路径';
+    return;
+  }
+
+  try {
+    const foundVaults = await scanVaults(devRoot);
+    setScannedVaults(devRoot, foundVaults);
+
+    const selectedMainVault = foundVaults.find((vault) => vault.path === devMainVault);
+    if (!selectedMainVault) {
+      throw new Error(`开发预设主库未在扫描结果中：${devMainVault}`);
+    }
+
+    setMainVault(selectedMainVault);
+    if (targetVaults.length === 0) {
+      throw new Error('开发预设没有可用的从库');
+    }
+
+    stepIndex = 2;
+  } catch (err) {
+    startupError = err instanceof Error ? err.message : String(err);
+    stepIndex = 0;
+  }
+};
+
+onMount(() => {
+  void applyDevPreset();
+});
 
 const toggleTargetVault = (vault: VaultInfo) => {
   if (mainVault?.path === vault.path) {
@@ -95,24 +135,9 @@ function getCanNext(): boolean {
       <StepNav {steps} currentKey={currentStep.key} />
 
       <Card>
-        <div class="summary">
-          <div>
-            <span>主库</span>
-            <strong>{mainVault?.name ?? '未选择'}</strong>
-          </div>
-          <div>
-            <span>从库</span>
-            <strong>{targetVaults.length}</strong>
-          </div>
-          <div>
-            <span>已发现</span>
-            <strong>{vaults.length}</strong>
-          </div>
-          <div>
-            <span>同步项</span>
-            <strong>{selectedPaths.length}</strong>
-          </div>
-        </div>
+        {#if startupError}
+          <p class="status-error startup-error">{startupError}</p>
+        {/if}
 
         <section class="step-body">
           {#if currentStep.key === 'scan'}
@@ -154,42 +179,20 @@ function getCanNext(): boolean {
   .layout {
     display: grid;
     grid-template-columns: 160px minmax(0, 1fr);
-    gap: 16px;
-  }
-
-  .summary {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-
-  .summary div {
-    display: grid;
-    gap: 4px;
-    padding: 10px 12px;
-    border: 1px solid #e4e7ec;
-    border-radius: 6px;
-  }
-
-  .summary span {
-    color: #667085;
-    font-size: 13px;
-  }
-
-  .summary strong {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    gap: var(--space-4);
   }
 
   .step-body {
     min-height: 360px;
   }
 
+  .startup-error {
+    margin-bottom: var(--space-4);
+  }
+
   .pending-step {
     display: grid;
-    gap: 8px;
+    gap: var(--space-2);
   }
 
   .pending-step h2,
@@ -201,12 +204,11 @@ function getCanNext(): boolean {
     display: flex;
     justify-content: flex-end;
     gap: 10px;
-    margin-top: 20px;
+    margin-top: var(--space-5);
   }
 
   @media (max-width: 760px) {
-    .layout,
-    .summary {
+    .layout {
       grid-template-columns: 1fr;
     }
   }

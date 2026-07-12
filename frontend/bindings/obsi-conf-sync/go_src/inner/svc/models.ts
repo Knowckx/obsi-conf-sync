@@ -11,7 +11,11 @@ import { Create as $Create } from "@wailsio/runtime";
 export class ConfigItem {
     "path": string;
     "name": string;
+    "version": string;
     "isDir": boolean;
+    "description": string;
+    "defaultSelected": boolean;
+    "isPlugin": boolean;
 
     /** Creates a new ConfigItem instance. */
     constructor($$source: Partial<ConfigItem> = {}) {
@@ -21,8 +25,20 @@ export class ConfigItem {
         if (!("name" in $$source)) {
             this["name"] = "";
         }
+        if (!("version" in $$source)) {
+            this["version"] = "";
+        }
         if (!("isDir" in $$source)) {
             this["isDir"] = false;
+        }
+        if (!("description" in $$source)) {
+            this["description"] = "";
+        }
+        if (!("defaultSelected" in $$source)) {
+            this["defaultSelected"] = false;
+        }
+        if (!("isPlugin" in $$source)) {
+            this["isPlugin"] = false;
         }
 
         Object.assign(this, $$source);

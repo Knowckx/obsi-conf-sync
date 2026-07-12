@@ -25,24 +25,24 @@ let { steps = [], currentKey = '' }: Props = $props();
   .step-nav {
     display: grid;
     align-content: start;
-    gap: 8px;
+    gap: var(--space-2);
   }
 
   .step-nav div {
     display: grid;
     grid-template-columns: 28px minmax(0, 1fr);
-    gap: 8px;
+    gap: var(--space-2);
     align-items: center;
-    padding: 8px;
-    border: 1px solid #e4e7ec;
-    border-radius: 6px;
-    color: #475467;
+    padding: var(--space-2);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-control);
+    color: var(--color-text-subtle);
   }
 
   .step-nav div.active {
-    border-color: #7f56d9;
-    color: #53389e;
-    background: #f9f5ff;
+    border-color: var(--color-primary);
+    color: var(--color-primary-text);
+    background: var(--color-primary-bg);
   }
 
   span {
@@ -50,14 +50,14 @@ let { steps = [], currentKey = '' }: Props = $props();
     place-items: center;
     width: 28px;
     height: 28px;
-    border-radius: 999px;
-    background: #f2f4f7;
-    font-size: 13px;
+    border-radius: var(--radius-round);
+    background: var(--color-surface-muted);
+    font-size: var(--font-size-sm);
   }
 
   .active span {
-    color: #fff;
-    background: #7f56d9;
+    color: var(--color-surface);
+    background: var(--color-primary);
   }
 
   strong {

@@ -8,7 +8,11 @@ export type VaultInfo = {
 export type ConfigItem = {
   path: string;
   name: string;
+  version: string;
   isDir: boolean;
+  description: string;
+  defaultSelected: boolean;
+  isPlugin: boolean;
 };
 
 export const scanVaults = (root: string): Promise<VaultInfo[]> => {

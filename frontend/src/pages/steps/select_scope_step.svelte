@@ -26,6 +26,17 @@ let {
 let error = $state('');
 let loading = $state(false);
 let loadedVaultPath = $state('');
+let regularConfigItems = $derived(configItems.filter((item) => !item.isPlugin));
+let selectedConfigItems = $derived(
+  regularConfigItems.filter((item) => selectedPaths.includes(item.path)),
+);
+let skippedConfigItems = $derived(
+  regularConfigItems.filter((item) => !selectedPaths.includes(item.path)),
+);
+let pluginConfigItems = $derived(configItems.filter((item) => item.isPlugin));
+let selectedPluginCount = $derived(
+  pluginConfigItems.filter((item) => selectedPaths.includes(item.path)).length,
+);
 
 $effect(() => {
   if (!mainVault || configItems.length > 0 || loadedVaultPath === mainVault.path) {
@@ -48,7 +59,7 @@ const loadConfigItems = async () => {
     const items = await listConfigItems(vaultPath);
     onConfigItemsChange(items);
     if (selectedPaths.length === 0) {
-      onSelectedPathsChange(items.filter(isDefaultSelected).map((item) => item.path));
+      onSelectedPathsChange(items.filter((item) => item.defaultSelected).map((item) => item.path));
     }
   } catch (err) {
     error = getErrMsg(err);
@@ -69,7 +80,9 @@ const selectAll = () => {
 };
 
 const selectDefault = () => {
-  onSelectedPathsChange(configItems.filter(isDefaultSelected).map((item) => item.path));
+  onSelectedPathsChange(
+    configItems.filter((item) => item.defaultSelected).map((item) => item.path),
+  );
 };
 
 const openConfigDir = async () => {
@@ -85,20 +98,44 @@ const openConfigDir = async () => {
   }
 };
 
-function isDefaultSelected(item: ConfigItem): boolean {
-  return item.path.includes('/') || !item.path.startsWith('workspace');
-}
-
 const getErrMsg = (err: unknown): string => {
   return err instanceof Error ? err.message : String(err);
 };
+
+const getItemDescription = (item: ConfigItem): string => {
+  if (!item.isPlugin || !item.isDir) {
+    return item.description;
+  }
+  return item.version
+    ? `社区插件 · ${item.name} · v${item.version}`
+    : `社区插件 · ${item.name}`;
+};
 </script>
 
-<div class="select-scope">
+{#snippet configItem(item: ConfigItem)}
+  <li>
+    <label class="item-name">
+      <input
+        type="checkbox"
+        checked={selectedPaths.includes(item.path)}
+        onchange={() => togglePath(item.path)}
+      />
+      <span>{item.path}</span>
+    </label>
+    <span class="item-description">{getItemDescription(item)}</span>
+    <span class="item-reserved" aria-hidden="true"></span>
+  </li>
+{/snippet}
+
+<div class="step-content">
   <div class="header">
     <div>
       <h2>选择同步范围</h2>
-      <p>{mainVault?.name ?? ''} 的 .obsidian 配置项</p>
+      <p class="vault-context">
+        <span class="vault-role">主库</span>
+        <strong title={mainVault?.path ?? ''}>{mainVault?.name ?? ''}</strong>
+        <span>的 .obsidian 配置项</span>
+      </p>
     </div>
     <div class="actions">
       <Button onclick={openConfigDir} disabled={!mainVault}>打开配置文件夹</Button>
@@ -110,45 +147,67 @@ const getErrMsg = (err: unknown): string => {
   {#if loading}
     <p class="muted">加载中</p>
   {:else if error}
-    <p class="error">{error}</p>
+    <p class="status-error">{error}</p>
   {:else if configItems.length === 0}
     <p class="muted">未发现配置项</p>
   {:else}
-    <ul class="config-list">
-      {#each configItems as item}
-        <li>
-          <label>
-            <input
-              type="checkbox"
-              checked={selectedPaths.includes(item.path)}
-              onchange={() => togglePath(item.path)}
-            />
-            <span>{item.path}</span>
-          </label>
-          {#if !isDefaultSelected(item)}
-            <em>默认跳过</em>
-          {/if}
-        </li>
-      {/each}
-    </ul>
+    <div class="config-groups">
+      <section class="config-group">
+        <h3>同步 <span>{selectedConfigItems.length}</span></h3>
+        {#if selectedConfigItems.length === 0}
+          <p class="muted">暂无同步项</p>
+        {:else}
+          <ul class="config-list">
+            {#each selectedConfigItems as item (item.path)}
+              {@render configItem(item)}
+            {/each}
+          </ul>
+        {/if}
+      </section>
+
+      <section class="config-group skipped-group">
+        <h3>跳过 <span>{skippedConfigItems.length}</span></h3>
+        {#if skippedConfigItems.length === 0}
+          <p class="muted">暂无跳过项</p>
+        {:else}
+          <ul class="config-list">
+            {#each skippedConfigItems as item (item.path)}
+              {@render configItem(item)}
+            {/each}
+          </ul>
+        {/if}
+      </section>
+
+      {#if pluginConfigItems.length > 0}
+        <section class="config-group plugin-group">
+          <div>
+            <h3>
+              社区插件
+              <span>已选择 {selectedPluginCount} / 共 {pluginConfigItems.length}</span>
+            </h3>
+            <p>插件包含程序和设置，请根据需要手动选择要同步的插件。</p>
+          </div>
+          <ul class="config-list">
+            {#each pluginConfigItems as item (item.path)}
+              {@render configItem(item)}
+            {/each}
+          </ul>
+        </section>
+      {/if}
+    </div>
   {/if}
 </div>
 
 <style>
-  .select-scope {
-    display: grid;
-    gap: 16px;
-  }
-
   .header {
     display: flex;
     justify-content: space-between;
-    gap: 16px;
+    gap: var(--space-4);
   }
 
   .actions {
     display: flex;
-    gap: 8px;
+    gap: var(--space-2);
   }
 
   h2,
@@ -157,12 +216,57 @@ const getErrMsg = (err: unknown): string => {
   }
 
   p {
-    color: #667085;
+    color: var(--color-text-muted);
+  }
+
+  .vault-context {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .vault-context strong {
+    color: var(--color-text);
+  }
+
+  .vault-role {
+    padding: 3px var(--space-2);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-muted);
+    color: var(--color-text-subtle);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+  }
+
+  .config-groups,
+  .config-group {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .skipped-group,
+  .plugin-group {
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-border);
+  }
+
+  h3 {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+    margin: 0;
+    font-size: 15px;
+  }
+
+  h3 span {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    font-weight: 400;
   }
 
   .config-list {
     display: grid;
-    gap: 8px;
+    gap: var(--space-2);
     list-style: none;
     margin: 0;
     padding: 0;
@@ -170,19 +274,20 @@ const getErrMsg = (err: unknown): string => {
 
   li {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) max-content;
-    gap: 12px;
+    grid-template-columns: minmax(180px, 1fr) minmax(240px, 2fr) minmax(120px, 1fr);
+    gap: var(--space-3);
     align-items: center;
-    padding: 10px 12px;
-    border: 1px solid #d0d5dd;
-    border-radius: 6px;
+    padding: 10px var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-control);
   }
 
-  label {
+  .item-name {
     display: flex;
     gap: 10px;
     align-items: center;
     min-width: 0;
+    overflow-wrap: anywhere;
   }
 
   input {
@@ -190,22 +295,13 @@ const getErrMsg = (err: unknown): string => {
     height: 16px;
   }
 
-  span {
+  .item-description {
+    color: var(--color-text-muted);
     overflow-wrap: anywhere;
   }
 
-  em {
-    color: #667085;
-    font-style: normal;
-    font-size: 13px;
-  }
-
   .muted {
-    color: #667085;
-  }
-
-  .error {
-    color: #b42318;
+    color: var(--color-text-muted);
   }
 
   @media (max-width: 640px) {
@@ -216,6 +312,10 @@ const getErrMsg = (err: unknown): string => {
 
     .header {
       display: grid;
+    }
+
+    .item-reserved {
+      display: none;
     }
   }
 </style>

@@ -60,7 +60,7 @@ const isTargetVault = (vault: VaultInfo) => targetVaults.some((item) => item.pat
 
   .vault-list {
     display: grid;
-    gap: 8px;
+    gap: var(--space-2);
     list-style: none;
     margin: 0;
     padding: 0;
@@ -69,47 +69,47 @@ const isTargetVault = (vault: VaultInfo) => targetVaults.some((item) => item.pat
   li {
     display: grid;
     grid-template-columns: minmax(0, 1fr) max-content;
-    gap: 12px;
+    gap: var(--space-3);
     align-items: center;
-    padding: 10px 12px;
-    border: 1px solid #d0d5dd;
-    border-radius: 6px;
+    padding: 10px var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-control);
   }
 
   .vault-info {
     display: grid;
-    gap: 4px;
+    gap: var(--space-1);
     min-width: 0;
   }
 
   span {
-    color: #475467;
+    color: var(--color-text-subtle);
     overflow-wrap: anywhere;
   }
 
   .actions {
     display: flex;
-    gap: 8px;
+    gap: var(--space-2);
   }
 
   button {
     min-width: 52px;
     height: 32px;
-    border: 1px solid #d0d5dd;
-    border-radius: 6px;
-    background: #fff;
-    color: #344054;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-control);
+    background: var(--color-surface);
+    color: var(--color-text);
     cursor: pointer;
   }
 
   button.active {
-    border-color: #7f56d9;
-    background: #f9f5ff;
-    color: #53389e;
+    border-color: var(--color-primary);
+    background: var(--color-primary-bg);
+    color: var(--color-primary-text);
   }
 
   button:disabled {
-    color: #98a2b3;
+    color: var(--color-text-disabled);
     cursor: not-allowed;
   }
 

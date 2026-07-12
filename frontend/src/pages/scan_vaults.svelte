@@ -44,7 +44,7 @@ const getErrMsg = (err: unknown): string => {
 };
 </script>
 
-<div class="scan-vaults">
+<div class="step-content">
   <div class="toolbar">
     <Button onclick={chooseAndScan} disabled={scanning}>
       {scanning ? '扫描中' : '选择目录'}
@@ -53,28 +53,18 @@ const getErrMsg = (err: unknown): string => {
   </div>
 
   {#if error}
-    <p class="error">{error}</p>
+    <p class="status-error">{error}</p>
   {/if}
 
   <VaultList {vaults} />
 </div>
 
 <style>
-  .scan-vaults {
-    display: grid;
-    gap: 16px;
-  }
-
   .toolbar {
     display: grid;
     grid-template-columns: max-content minmax(0, 1fr);
-    gap: 12px;
+    gap: var(--space-3);
     align-items: center;
-  }
-
-  .error {
-    color: #b42318;
-    margin: 0;
   }
 
   @media (max-width: 640px) {

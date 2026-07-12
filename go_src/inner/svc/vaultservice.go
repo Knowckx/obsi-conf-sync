@@ -1,6 +1,7 @@
 package svc
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -24,9 +25,13 @@ type VaultInfo struct {
 
 // ConfigItem 表示 .obsidian 下可同步的配置项。
 type ConfigItem struct {
-	Path  string `json:"path"`
-	Name  string `json:"name"`
-	IsDir bool   `json:"isDir"`
+	Path            string `json:"path"`
+	Name            string `json:"name"`
+	Version         string `json:"version"`
+	IsDir           bool   `json:"isDir"`
+	Description     string `json:"description"`
+	DefaultSelected bool   `json:"defaultSelected"`
+	IsPlugin        bool   `json:"isPlugin"`
 }
 
 // String 返回 vault 的简短展示文本。
@@ -197,11 +202,7 @@ func listConfigItems(obsidianPath string) ([]ConfigItem, error) {
 		if entry.IsDir() {
 			path += "/"
 		}
-		items = append(items, ConfigItem{
-			Path:  path,
-			Name:  entry.Name(),
-			IsDir: entry.IsDir(),
-		})
+		items = append(items, newConfigItem(path, entry.Name(), entry.IsDir(), false))
 	}
 	return items, nil
 }
@@ -220,13 +221,35 @@ func listPluginConfigItems(obsidianPath string) ([]ConfigItem, error) {
 			continue
 		}
 		path := filepath.ToSlash(filepath.Join("plugins", entry.Name())) + "/"
-		items = append(items, ConfigItem{
-			Path:  path,
-			Name:  entry.Name(),
-			IsDir: true,
-		})
+		item := newConfigItem(path, entry.Name(), true, true)
+		manifest := readPluginManifest(filepath.Join(pluginsPath, entry.Name(), "manifest.json"))
+		if manifest.Name != "" {
+			item.Name = manifest.Name
+		}
+		item.Version = manifest.Version
+		items = append(items, item)
 	}
 	return items, nil
+}
+
+// pluginManifest 表示插件清单中用于展示的信息。
+type pluginManifest struct {
+	Name    string `json:"name"`
+	Version string `json:"version"`
+}
+
+// readPluginManifest 读取插件名称和版本，读取失败时返回零值。
+func readPluginManifest(path string) pluginManifest {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return pluginManifest{}
+	}
+
+	var manifest pluginManifest
+	if err := json.Unmarshal(data, &manifest); err != nil {
+		return pluginManifest{}
+	}
+	return manifest
 }
 
 // openDir 使用当前系统的文件管理器打开目录。
