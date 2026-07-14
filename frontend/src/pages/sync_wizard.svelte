@@ -130,54 +130,66 @@ function getCanNext(): boolean {
 </script>
 
 <PanelBg>
-  <ContentShell maxWidth="max-w-6xl">
-    <div class="layout">
-      <StepNav {steps} currentKey={currentStep.key} />
+  <div class="panel-body">
+    <ContentShell maxWidth="max-w-6xl">
+      <div class="layout">
+        <StepNav {steps} currentKey={currentStep.key} />
 
-      <Card>
-        {#if startupError}
-          <p class="status-error startup-error">{startupError}</p>
-        {/if}
-
-        <section class="step-body">
-          {#if currentStep.key === 'scan'}
-            <ScanVaults {root} {vaults} onScanned={setScannedVaults} />
-          {:else if currentStep.key === 'vaults'}
-            <SelectVaultsStep
-              {vaults}
-              {mainVault}
-              {targetVaults}
-              onMainChange={setMainVault}
-              onTargetToggle={toggleTargetVault}
-            />
-          {:else if currentStep.key === 'scope'}
-            <SelectScopeStep
-              {mainVault}
-              {configItems}
-              {selectedPaths}
-              onConfigItemsChange={(items) => (configItems = items)}
-              onSelectedPathsChange={(paths) => (selectedPaths = paths)}
-            />
-          {:else}
-            <div class="pending-step">
-              <h2>{currentStep.label}</h2>
-              <p>等待对应后端接口补齐。</p>
-            </div>
+        <Card>
+          {#if startupError}
+            <p class="status-error startup-error">{startupError}</p>
           {/if}
-        </section>
 
-        <div class="footer">
-          <Button onclick={goBack} disabled={!canBack}>上一步</Button>
-          <Button onclick={goNext} disabled={!canNext}>下一步</Button>
-        </div>
-      </Card>
-    </div>
-  </ContentShell>
+          <section class="step-body">
+            {#if currentStep.key === 'scan'}
+              <ScanVaults {root} {vaults} onScanned={setScannedVaults} />
+            {:else if currentStep.key === 'vaults'}
+              <SelectVaultsStep
+                {vaults}
+                {mainVault}
+                {targetVaults}
+                onMainChange={setMainVault}
+                onTargetToggle={toggleTargetVault}
+              />
+            {:else if currentStep.key === 'scope'}
+              <SelectScopeStep
+                {mainVault}
+                {configItems}
+                {selectedPaths}
+                onConfigItemsChange={(items) => (configItems = items)}
+                onSelectedPathsChange={(paths) => (selectedPaths = paths)}
+              />
+            {:else}
+              <div class="pending-step">
+                <h2>{currentStep.label}</h2>
+                <p>等待对应后端接口补齐。</p>
+              </div>
+            {/if}
+          </section>
+
+          <div class="footer">
+            <Button onclick={goBack} disabled={!canBack}>上一步</Button>
+            <Button onclick={goNext} disabled={!canNext}>下一步</Button>
+          </div>
+        </Card>
+      </div>
+    </ContentShell>
+  </div>
 </PanelBg>
 
 <style>
+  .panel-body {
+    display: grid;
+    min-height: calc(100vh - 5rem);
+  }
+
+  .panel-body > :global(section) {
+    width: 100%;
+  }
+
   .layout {
     display: grid;
+    flex: 1;
     grid-template-columns: 160px minmax(0, 1fr);
     gap: var(--space-4);
   }
