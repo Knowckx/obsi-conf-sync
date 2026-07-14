@@ -1,16 +1,14 @@
-package svc
+package conf
 
-// configItemRule 定义已知配置项的展示和默认选择规则。
-type configItemRule struct {
-	Description     string
-	DefaultSelected bool
-	IsPlugin        bool
-}
-
-var configItemRules = map[string]configItemRule{
+// ConfigItemRules 是已知配置项的同步规则。
+var ConfigItemRules = map[string]ConfigItemRule{
 	// 默认同步
 	"app.json": {
 		Description:     "编辑器的通用配置",
+		DefaultSelected: true,
+	},
+	"appearance.json": {
+		Description:     "外观配置和启用的 CSS 片段，应与 snippets/ 一起同步",
 		DefaultSelected: true,
 	},
 	"core-plugins.json": {
@@ -21,12 +19,12 @@ var configItemRules = map[string]configItemRule{
 		Description:     "自定义快捷键",
 		DefaultSelected: true,
 	},
-	"appearance.json": {
-		Description:     "外观配置和启用的 CSS 片段，应与 snippets/ 一起同步",
-		DefaultSelected: true,
-	},
 	"snippets/": {
 		Description:     "自定义编辑器样式",
+		DefaultSelected: true,
+	},
+	"themes/": {
+		Description:     "已安装的主题，应与 appearance.json 一起同步",
 		DefaultSelected: true,
 	},
 
@@ -62,22 +60,9 @@ var configItemRules = map[string]configItemRule{
 	},
 }
 
-// newConfigItem 创建配置项并应用已知规则。
-func newConfigItem(path string, name string, isDir bool, isPlugin bool) ConfigItem {
-	rule := configItemRules[path]
-	if rule.IsPlugin {
-		isPlugin = true
-	}
-	description := rule.Description
-	if isPlugin && description == "" {
-		description = "社区插件程序和设置"
-	}
-	return ConfigItem{
-		Path:            path,
-		Name:            name,
-		IsDir:           isDir,
-		Description:     description,
-		DefaultSelected: rule.DefaultSelected,
-		IsPlugin:        isPlugin,
-	}
+// ConfigItemRule 定义已知配置项的展示和默认选择规则。
+type ConfigItemRule struct {
+	Description     string
+	DefaultSelected bool
+	IsPlugin        bool
 }

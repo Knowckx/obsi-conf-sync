@@ -207,6 +207,26 @@ func listConfigItems(obsidianPath string) ([]ConfigItem, error) {
 	return items, nil
 }
 
+// newConfigItem 创建配置项并应用已知规则。
+func newConfigItem(path string, name string, isDir bool, isPlugin bool) ConfigItem {
+	rule := conf.ConfigItemRules[path]
+	if rule.IsPlugin {
+		isPlugin = true
+	}
+	description := rule.Description
+	if isPlugin && description == "" {
+		description = "社区插件程序和设置"
+	}
+	return ConfigItem{
+		Path:            path,
+		Name:            name,
+		IsDir:           isDir,
+		Description:     description,
+		DefaultSelected: rule.DefaultSelected,
+		IsPlugin:        isPlugin,
+	}
+}
+
 // listPluginConfigItems 列出 .obsidian/plugins 下的插件配置目录。
 func listPluginConfigItems(obsidianPath string) ([]ConfigItem, error) {
 	pluginsPath := filepath.Join(obsidianPath, "plugins")
