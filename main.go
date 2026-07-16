@@ -33,6 +33,9 @@ func main() {
 		Assets: application.AssetOptions{
 			Handler: application.AssetFileServerFS(assets),
 		},
+		Windows: application.WindowsOptions{
+			AdditionalBrowserArgs: []string{"--remote-debugging-port=9222"},
+		},
 		Mac: application.MacOptions{
 			ApplicationShouldTerminateAfterLastWindowClosed: true,
 		},

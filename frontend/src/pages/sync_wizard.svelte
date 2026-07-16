@@ -1,7 +1,10 @@
 <script lang="ts">
 import { onMount } from 'svelte';
-import { Button, Card, ContentShell, PanelBg } from 'infa-s5';
+import { Button } from 'infa-s5';
 import { scanVaults, type ConfigItem, type VaultInfo } from '@/lib/api/vault_service';
+import Card from '@/lib/TempComps/card.svelte';
+import Page from '@/lib/TempComps/page.svelte';
+import Section from '@/lib/TempComps/section.svelte';
 import ScanVaults from './scan_vaults.svelte';
 import SelectScopeStep from './steps/select_scope_step.svelte';
 import SelectVaultsStep from './steps/select_vaults_step.svelte';
@@ -129,62 +132,66 @@ function getCanNext(): boolean {
 }
 </script>
 
-<PanelBg>
+<!-- <PanelBg>：应用级背景已由 AppLayout 负责。 -->
   <div class="panel-body">
-    <ContentShell maxWidth="max-w-6xl">
+    <!-- <ContentShell maxWidth="max-w-6xl">：页面容器已由 Page 负责。 -->
+    <Page>
       <div class="layout">
         <StepNav {steps} currentKey={currentStep.key} />
 
-        <Card>
-          {#if startupError}
-            <p class="status-error startup-error">{startupError}</p>
-          {/if}
-
-          <section class="step-body">
-            {#if currentStep.key === 'scan'}
-              <ScanVaults {root} {vaults} onScanned={setScannedVaults} />
-            {:else if currentStep.key === 'vaults'}
-              <SelectVaultsStep
-                {vaults}
-                {mainVault}
-                {targetVaults}
-                onMainChange={setMainVault}
-                onTargetToggle={toggleTargetVault}
-              />
-            {:else if currentStep.key === 'scope'}
-              <SelectScopeStep
-                {mainVault}
-                {configItems}
-                {selectedPaths}
-                onConfigItemsChange={(items) => (configItems = items)}
-                onSelectedPathsChange={(paths) => (selectedPaths = paths)}
-              />
-            {:else}
-              <div class="pending-step">
-                <h2>{currentStep.label}</h2>
-                <p>等待对应后端接口补齐。</p>
-              </div>
+        <Section>
+          <!-- infa-s5: <Card> -->
+          <Card>
+            {#if startupError}
+              <p class="status-error startup-error">{startupError}</p>
             {/if}
-          </section>
 
-          <div class="footer">
-            <Button onclick={goBack} disabled={!canBack}>上一步</Button>
-            <Button onclick={goNext} disabled={!canNext}>下一步</Button>
-          </div>
-        </Card>
+            <!-- <section class="step-body">：页面区块已由 Section 负责。 -->
+            <div class="step-body">
+              {#if currentStep.key === 'scan'}
+                <ScanVaults {root} {vaults} onScanned={setScannedVaults} />
+              {:else if currentStep.key === 'vaults'}
+                <SelectVaultsStep
+                  {vaults}
+                  {mainVault}
+                  {targetVaults}
+                  onMainChange={setMainVault}
+                  onTargetToggle={toggleTargetVault}
+                />
+              {:else if currentStep.key === 'scope'}
+                <SelectScopeStep
+                  {mainVault}
+                  {configItems}
+                  {selectedPaths}
+                  onConfigItemsChange={(items) => (configItems = items)}
+                  onSelectedPathsChange={(paths) => (selectedPaths = paths)}
+                />
+              {:else}
+                <div class="pending-step">
+                  <h2>{currentStep.label}</h2>
+                  <p>等待对应后端接口补齐。</p>
+                </div>
+              {/if}
+            </div>
+            <!-- </section> -->
+
+            <div class="footer">
+              <Button onclick={goBack} disabled={!canBack}>上一步</Button>
+              <Button onclick={goNext} disabled={!canNext}>下一步</Button>
+            </div>
+          </Card>
+          <!-- infa-s5: </Card> -->
+        </Section>
       </div>
-    </ContentShell>
+    </Page>
+    <!-- </ContentShell> -->
   </div>
-</PanelBg>
+<!-- </PanelBg> -->
 
 <style>
   .panel-body {
     display: grid;
     min-height: calc(100vh - 5rem);
-  }
-
-  .panel-body > :global(section) {
-    width: 100%;
   }
 
   .layout {

@@ -1,6 +1,7 @@
 <script lang="ts">
 import { onMount } from 'svelte';
 import { Window as WailsWindow } from '@wailsio/runtime';
+import AppLayout from './lib/TempComps/app_layout.svelte';
 import SyncWizard from './pages/sync_wizard.svelte';
 
 onMount(async () => {
@@ -16,12 +17,6 @@ onMount(async () => {
 });
 </script>
 
-<main>
+<AppLayout>
   <SyncWizard />
-</main>
-
-<style>
-  main {
-    min-height: 100vh;
-  }
-</style>
+</AppLayout>
