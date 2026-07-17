@@ -5,7 +5,7 @@ go 1.26.2
 require (
 	github.com/cockroachdb/errors v1.13.0
 	github.com/pelletier/go-toml/v2 v2.4.2
-	github.com/wailsapp/wails/v3 v3.0.0-alpha2.104
+	github.com/wailsapp/wails/v3 v3.0.0-alpha2.117
 )
 
 require (
@@ -13,7 +13,6 @@ require (
 	github.com/cockroachdb/logtags v0.0.0-20230118201751-21c54148d20b // indirect
 	github.com/cockroachdb/redact v1.1.5 // indirect
 	github.com/coder/websocket v1.8.14 // indirect
-	github.com/ebitengine/purego v0.9.1 // indirect
 	github.com/getsentry/sentry-go v0.46.0 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/godbus/dbus/v5 v5.2.2 // indirect
@@ -25,7 +24,6 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rogpeppe/go-internal v1.14.1 // indirect
-	github.com/wailsapp/wails/webview2 v1.0.24 // indirect
 	golang.org/x/sys v0.43.0 // indirect
 	golang.org/x/text v0.37.0 // indirect
 )

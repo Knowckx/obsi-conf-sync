@@ -2,9 +2,9 @@
 import { onMount } from 'svelte';
 import { Button } from 'infa-s5';
 import { scanVaults, type ConfigItem, type VaultInfo } from '@/lib/api/vault_service';
-import Card from '@/lib/TempComps/card.svelte';
-import Page from '@/lib/TempComps/page.svelte';
-import Section from '@/lib/TempComps/section.svelte';
+import Card from '@/lib/infa_s5_candidates/card.svelte';
+import Page from '@/lib/infa_s5_candidates/page.svelte';
+import Section from '@/lib/infa_s5_candidates/section.svelte';
 import ScanVaults from './scan_vaults.svelte';
 import SelectScopeStep from './steps/select_scope_step.svelte';
 import SelectVaultsStep from './steps/select_vaults_step.svelte';
