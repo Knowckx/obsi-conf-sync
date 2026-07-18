@@ -1,13 +1,20 @@
 <script lang="ts">
 import { onMount } from 'svelte';
 import { Button } from 'infa-s5';
-import { scanVaults, type ConfigItem, type VaultInfo } from '@/lib/api/vault_service';
+import {
+  buildSyncPlan,
+  scanVaults,
+  type ConfigItem,
+  type SyncPlan,
+  type VaultInfo,
+} from '@/lib/api/vault_service';
 import Card from '@/lib/infa_s5_candidates/card.svelte';
 import Page from '@/lib/infa_s5_candidates/page.svelte';
 import Section from '@/lib/infa_s5_candidates/section.svelte';
 import ScanVaults from './scan_vaults.svelte';
 import SelectScopeStep from './steps/select_scope_step.svelte';
 import SelectVaultsStep from './steps/select_vaults_step.svelte';
+import SyncPlanStep from './steps/sync_plan_step.svelte';
 import StepNav from '@/lib/components/step_nav.svelte';
 
 type StepKey = 'scan' | 'vaults' | 'scope' | 'plan' | 'result';
@@ -32,6 +39,9 @@ let mainVault = $state<VaultInfo | null>(null);
 let targetVaults = $state<VaultInfo[]>([]);
 let configItems = $state<ConfigItem[]>([]);
 let selectedPaths = $state<string[]>([]);
+let syncPlan = $state<SyncPlan | null>(null);
+let planLoading = $state(false);
+let planError = $state('');
 let startupError = $state('');
 
 let currentStep = $derived(steps[stepIndex]!);
@@ -52,6 +62,8 @@ const setMainVault = (vault: VaultInfo) => {
   targetVaults = vaults.filter((item) => item.path !== vault.path);
   configItems = [];
   selectedPaths = [];
+  syncPlan = null;
+  planError = '';
 };
 
 // 开发环境按本机预设自动进入同步范围。
@@ -109,9 +121,36 @@ const goBack = () => {
   }
 };
 
-const goNext = () => {
+const goNext = async () => {
   if (canNext && stepIndex < steps.length - 1) {
+    if (currentStep.key === 'scope') {
+      await loadSyncPlan();
+      if (!syncPlan) {
+        return;
+      }
+    }
     stepIndex += 1;
+  }
+};
+
+const loadSyncPlan = async () => {
+  if (!mainVault || targetVaults.length === 0) {
+    return;
+  }
+
+  planLoading = true;
+  planError = '';
+  syncPlan = null;
+  try {
+    syncPlan = await buildSyncPlan({
+      mainVaultPath: mainVault.path,
+      targetVaultPaths: targetVaults.map((vault) => vault.path),
+      selectedPaths,
+    });
+  } catch (err) {
+    planError = err instanceof Error ? err.message : String(err);
+  } finally {
+    planLoading = false;
   }
 };
 
@@ -166,6 +205,8 @@ function getCanNext(): boolean {
                   onConfigItemsChange={(items) => (configItems = items)}
                   onSelectedPathsChange={(paths) => (selectedPaths = paths)}
                 />
+              {:else if currentStep.key === 'plan'}
+                <SyncPlanStep plan={syncPlan} loading={planLoading} error={planError} />
               {:else}
                 <div class="pending-step">
                   <h2>{currentStep.label}</h2>

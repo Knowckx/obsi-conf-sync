@@ -15,11 +15,20 @@ import { Call as $Call, CancellablePromise as $CancellablePromise, Create as $Cr
 import * as $models from "./models.js";
 
 /**
+ * BuildSyncPlan 根据主库配置和用户选择生成覆盖同步计划，不修改文件。
+ */
+export function BuildSyncPlan(req: $models.SyncRequest): $CancellablePromise<$models.SyncPlan> {
+    return $Call.ByID(3225252696, req).then(($result: any) => {
+        return $$createType0($result);
+    });
+}
+
+/**
  * ListConfigItems 列出 vault 的 .obsidian 下可选择同步的配置项。
  */
 export function ListConfigItems(vaultPath: string): $CancellablePromise<$models.ConfigItem[]> {
     return $Call.ByID(3677850622, vaultPath).then(($result: any) => {
-        return $$createType1($result);
+        return $$createType2($result);
     });
 }
 
@@ -35,12 +44,13 @@ export function OpenVaultConfigDir(vaultPath: string): $CancellablePromise<void>
  */
 export function ScanVaults(root: string): $CancellablePromise<$models.VaultInfo[]> {
     return $Call.ByID(4174715004, root).then(($result: any) => {
-        return $$createType3($result);
+        return $$createType4($result);
     });
 }
 
 // Private type creation functions
-const $$createType0 = $models.ConfigItem.createFrom;
-const $$createType1 = $Create.Array($$createType0);
-const $$createType2 = $models.VaultInfo.createFrom;
-const $$createType3 = $Create.Array($$createType2);
+const $$createType0 = $models.SyncPlan.createFrom;
+const $$createType1 = $models.ConfigItem.createFrom;
+const $$createType2 = $Create.Array($$createType1);
+const $$createType3 = $models.VaultInfo.createFrom;
+const $$createType4 = $Create.Array($$createType3);

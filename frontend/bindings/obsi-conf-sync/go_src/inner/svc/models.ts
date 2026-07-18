@@ -54,6 +54,137 @@ export class ConfigItem {
 }
 
 /**
+ * SyncPlan 描述一次同步计划。
+ */
+export class SyncPlan {
+    "mainVaultPath": string;
+    "targets": TargetSyncPlan[];
+
+    /** Creates a new SyncPlan instance. */
+    constructor($$source: Partial<SyncPlan> = {}) {
+        if (!("mainVaultPath" in $$source)) {
+            this["mainVaultPath"] = "";
+        }
+        if (!("targets" in $$source)) {
+            this["targets"] = [];
+        }
+
+        Object.assign(this, $$source);
+    }
+
+    /**
+     * Creates a new SyncPlan instance from a string or object.
+     */
+    static createFrom($$source: any = {}): SyncPlan {
+        const $$createField1_0 = $$createType1;
+        let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
+        if ("targets" in $$parsedSource) {
+            $$parsedSource["targets"] = $$createField1_0($$parsedSource["targets"]);
+        }
+        return new SyncPlan($$parsedSource as Partial<SyncPlan>);
+    }
+}
+
+/**
+ * SyncRequest 描述一次同步计划请求。
+ */
+export class SyncRequest {
+    "mainVaultPath": string;
+
+    /**
+     * 从库
+     */
+    "targetVaultPaths": string[];
+
+    /**
+     * 选择要同步的配置
+     */
+    "selectedPaths": string[];
+
+    /** Creates a new SyncRequest instance. */
+    constructor($$source: Partial<SyncRequest> = {}) {
+        if (!("mainVaultPath" in $$source)) {
+            this["mainVaultPath"] = "";
+        }
+        if (!("targetVaultPaths" in $$source)) {
+            this["targetVaultPaths"] = [];
+        }
+        if (!("selectedPaths" in $$source)) {
+            this["selectedPaths"] = [];
+        }
+
+        Object.assign(this, $$source);
+    }
+
+    /**
+     * Creates a new SyncRequest instance from a string or object.
+     */
+    static createFrom($$source: any = {}): SyncRequest {
+        const $$createField1_0 = $$createType2;
+        const $$createField2_0 = $$createType2;
+        let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
+        if ("targetVaultPaths" in $$parsedSource) {
+            $$parsedSource["targetVaultPaths"] = $$createField1_0($$parsedSource["targetVaultPaths"]);
+        }
+        if ("selectedPaths" in $$parsedSource) {
+            $$parsedSource["selectedPaths"] = $$createField2_0($$parsedSource["selectedPaths"]);
+        }
+        return new SyncRequest($$parsedSource as Partial<SyncRequest>);
+    }
+}
+
+/**
+ * TargetSyncPlan 描述单个目标库的同步计划。
+ */
+export class TargetSyncPlan {
+    /**
+     * 当前目标库的绝对路径
+     */
+    "vaultPath": string;
+
+    /**
+     * 目标库中尚不存在的配置路径
+     */
+    "create": string[];
+
+    /**
+     * 目标库中已经存在的配置路径
+     */
+    "overwrite": string[];
+
+    /** Creates a new TargetSyncPlan instance. */
+    constructor($$source: Partial<TargetSyncPlan> = {}) {
+        if (!("vaultPath" in $$source)) {
+            this["vaultPath"] = "";
+        }
+        if (!("create" in $$source)) {
+            this["create"] = [];
+        }
+        if (!("overwrite" in $$source)) {
+            this["overwrite"] = [];
+        }
+
+        Object.assign(this, $$source);
+    }
+
+    /**
+     * Creates a new TargetSyncPlan instance from a string or object.
+     */
+    static createFrom($$source: any = {}): TargetSyncPlan {
+        const $$createField1_0 = $$createType2;
+        const $$createField2_0 = $$createType2;
+        let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
+        if ("create" in $$parsedSource) {
+            $$parsedSource["create"] = $$createField1_0($$parsedSource["create"]);
+        }
+        if ("overwrite" in $$parsedSource) {
+            $$parsedSource["overwrite"] = $$createField2_0($$parsedSource["overwrite"]);
+        }
+        return new TargetSyncPlan($$parsedSource as Partial<TargetSyncPlan>);
+    }
+}
+
+/**
  * VaultInfo 表示扫描发现的 Obsidian vault。
  */
 export class VaultInfo {
@@ -80,3 +211,8 @@ export class VaultInfo {
         return new VaultInfo($$parsedSource as Partial<VaultInfo>);
     }
 }
+
+// Private type creation functions
+const $$createType0 = TargetSyncPlan.createFrom;
+const $$createType1 = $Create.Array($$createType0);
+const $$createType2 = $Create.Array($Create.Any);
