@@ -1,4 +1,5 @@
 .task
+/.env.local
 bin
 frontend/dist
 frontend/node_modules

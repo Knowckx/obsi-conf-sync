@@ -17,6 +17,7 @@ includes:
 tasks:
   dev:
     summary: 开发模式启动 Wails
+    dotenv: ['.env.local']
     cmds:
       - wails3 dev -config ./build/config.yml -port {{.VITE_PORT}}
 
@@ -24,6 +25,11 @@ tasks:
     summary: 重新生成 Wails 前端绑定
     cmds:
       - wails3 generate bindings -ts
+
+  tidy:
+    summary: 整理 Go 模块依赖
+    cmds:
+      - task: common:tidy
 
   build:
     summary: 构建当前系统版本，Windows 下转到 windows:build

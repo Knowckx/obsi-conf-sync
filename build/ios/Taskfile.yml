@@ -43,7 +43,6 @@ tasks:
     deps:
       - task: generate:ios:overlay
       - task: generate:ios:xcode
-      - task: common:go:mod:tidy
       - task: common:build:frontend
         vars:
           BUILD_FLAGS:

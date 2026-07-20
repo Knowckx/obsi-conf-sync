@@ -1,12 +1,8 @@
 version: '3'
 
 tasks:
-  go:mod:tidy:
-    summary: Runs `go mod tidy`
-    internal: true
-    # Universal/multi-arch builds invoke this concurrently from parallel deps;
-    # two `go mod tidy` processes racing on go.mod can corrupt it (#4637).
-    run: once
+  tidy:
+    summary: 整理 Go 模块依赖
     cmds:
       - go mod tidy
 
@@ -82,6 +78,7 @@ tasks:
     sources:
       - "**/*"
       - exclude: node_modules/**/*
+      - exclude: dist/**/*
     generates:
       - dist/**/*
     deps:
@@ -176,8 +173,6 @@ tasks:
   generate:bindings:
     summary: Generates bindings for the frontend
     run: once
-    deps:
-      - task: go:mod:tidy
     sources:
       - "**/*.[jt]s"
       - exclude: frontend/**/*
@@ -205,8 +200,6 @@ tasks:
 
   dev:frontend:
     summary: Runs the frontend in development mode
-    deps:
-      - task: install:frontend:deps
     cmds:
       - task: frontend:dev:{{.PACKAGE_MANAGER}}
 

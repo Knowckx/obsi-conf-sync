@@ -34,7 +34,6 @@ tasks:
     summary: Builds the application using native Go cross-compilation
     internal: true
     deps:
-      - task: common:go:mod:tidy
       - task: common:build:frontend
         vars:
           BUILD_FLAGS:
@@ -52,7 +51,7 @@ tasks:
         vars:
           ARCH: '{{.ARCH}}'
       - '{{if eq .OBFUSCATED "true"}}garble {{.GARBLE_ARGS}} build{{else}}go build{{end}} {{.BUILD_FLAGS}} -o "{{.BIN_DIR}}/{{.APP_NAME}}.exe"'
-      - cmd: powershell Remove-item *.syso
+      - cmd: pwsh -NoProfile -Command "Remove-Item -Path '*.syso' -Force"
         platforms: [windows]
       - cmd: rm -f *.syso
         platforms: [linux, darwin]

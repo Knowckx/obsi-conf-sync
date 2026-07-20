@@ -34,6 +34,15 @@ const steps: WizardStep[] = [
   { key: 'result', label: '执行结果' },
 ];
 
+const devSelectedPaths = [
+  'app.json',
+  'community-plugins.json',
+  'snippets/',
+  'themes/',
+  'plugins/open-in-new-tab/',
+  'plugins/open-tab-settings/',
+];
+
 let stepIndex = $state(0);
 let root = $state('');
 let vaults = $state<VaultInfo[]>([]);
@@ -89,20 +98,15 @@ const applyDevPreset = async () => {
   }
 
   devPresetError = '';
-  const devRoot = import.meta.env.VITE_DEV_VAULT_ROOT;
-  const devMainVault = import.meta.env.VITE_DEV_MAIN_VAULT;
-  if (!devRoot || !devMainVault) {
-    devPresetError = '开发预设缺少 vault 根目录或主库路径';
-    return;
-  }
+  const devRoot = 'test_cases';
 
   try {
     const foundVaults = await scanVaults(devRoot);
     setScannedVaults(devRoot, foundVaults);
 
-    const selectedMainVault = foundVaults.find((vault) => vault.path === devMainVault);
+    const selectedMainVault = foundVaults.find((vault) => vault.name === 'vault1');
     if (!selectedMainVault) {
-      throw new Error(`开发预设主库未在扫描结果中：${devMainVault}`);
+      throw new Error('开发预设未找到主库 vault1');
     }
 
     setMainVault(selectedMainVault);
@@ -110,6 +114,7 @@ const applyDevPreset = async () => {
       throw new Error('开发预设没有可用的从库');
     }
 
+    selectedPaths = [...devSelectedPaths];
     stepIndex = 2;
   } catch (err) {
     devPresetError = err instanceof Error ? err.message : String(err);

@@ -2,9 +2,10 @@ package main
 
 import (
 	"embed"
-	"obsi-conf-sync/go_src/inner/svc"
-
 	"log"
+	"os"
+
+	"obsi-conf-sync/go_src/inner/svc"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
 )
@@ -18,6 +19,10 @@ import (
 var assets embed.FS
 
 func main() {
+	windowsOptions := application.WindowsOptions{}
+	if os.Getenv("OBSI_WEBVIEW_DEVTOOLS") == "1" {
+		windowsOptions.AdditionalBrowserArgs = []string{"--remote-debugging-port=9222"}
+	}
 
 	// Create a new Wails application by providing the necessary options.
 	// Variables 'Name' and 'Description' are for application metadata.
@@ -33,9 +38,7 @@ func main() {
 		Assets: application.AssetOptions{
 			Handler: application.AssetFileServerFS(assets),
 		},
-		Windows: application.WindowsOptions{
-			AdditionalBrowserArgs: []string{"--remote-debugging-port=9222"},
-		},
+		Windows: windowsOptions,
 		Mac: application.MacOptions{
 			ApplicationShouldTerminateAfterLastWindowClosed: true,
 		},
