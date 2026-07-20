@@ -1,0 +1,4 @@
+/* 仅目标库存在，覆盖模式下应保留 */
+.target-only {
+  outline: 1px dashed #999;
+}

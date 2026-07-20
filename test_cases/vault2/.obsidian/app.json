@@ -1,0 +1,4 @@
+{
+  "testVault": "vault2",
+  "syncFixture": "overwrite-target"
+}

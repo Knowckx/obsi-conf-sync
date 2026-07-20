@@ -24,3 +24,16 @@ type TargetSyncPlan struct {
 	// 目标库中已经存在的配置路径
 	Overwrite []string `json:"overwrite"`
 }
+
+// SyncResult 描述一次同步的执行结果。
+type SyncResult struct {
+	Targets []TargetSyncResult `json:"targets"`
+}
+
+// TargetSyncResult 描述单个目标库的执行结果。
+type TargetSyncResult struct {
+	VaultPath string   `json:"vaultPath"`
+	Created   []string `json:"created"`
+	Overwrote []string `json:"overwrote"`
+	Errors    []string `json:"errors"`
+}

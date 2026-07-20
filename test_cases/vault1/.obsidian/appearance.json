@@ -1,0 +1,8 @@
+{
+  "cssTheme": "",
+  "enabledCssSnippets": [
+    "table-spacing-fix",
+    "vscode_light"
+  ],
+  "baseFontSize": 16
+}

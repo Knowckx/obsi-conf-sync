@@ -1,5 +1,8 @@
 import { VaultService } from '@bindings/obsi-conf-sync/go_src/inner/svc';
-import { SyncRequest as SyncRequestModel } from '@bindings/obsi-conf-sync/go_src/inner/svc/models';
+import {
+  SyncPlan as SyncPlanModel,
+  SyncRequest as SyncRequestModel,
+} from '@bindings/obsi-conf-sync/go_src/inner/svc/models';
 
 export type VaultInfo = {
   path: string;
@@ -33,6 +36,17 @@ export type SyncPlan = {
   targets: TargetSyncPlan[];
 };
 
+export type TargetSyncResult = {
+  vaultPath: string;
+  created: string[];
+  overwrote: string[];
+  errors: string[];
+};
+
+export type SyncResult = {
+  targets: TargetSyncResult[];
+};
+
 export const scanVaults = (root: string): Promise<VaultInfo[]> => {
   return VaultService.ScanVaults(root);
 };
@@ -47,4 +61,8 @@ export const openVaultConfigDir = (vaultPath: string): Promise<void> => {
 
 export const buildSyncPlan = (request: SyncRequest): Promise<SyncPlan> => {
   return VaultService.BuildSyncPlan(new SyncRequestModel(request));
+};
+
+export const executeSyncPlan = (plan: SyncPlan): Promise<SyncResult> => {
+  return VaultService.ExecuteSyncPlan(new SyncPlanModel(plan));
 };

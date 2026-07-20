@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync/atomic"
 
 	"obsi-conf-sync/go_src/conf"
 
@@ -15,7 +16,9 @@ import (
 )
 
 // VaultService 向前端暴露 vault 扫描接口。
-type VaultService struct{}
+type VaultService struct {
+	isSyncing atomic.Bool // 是否正在执行同步
+}
 
 // VaultInfo 表示扫描发现的 Obsidian vault。
 type VaultInfo struct {

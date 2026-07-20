@@ -1,11 +1,12 @@
 <script lang="ts">
-import { onMount } from 'svelte';
 import { Button } from 'infa-s5';
 import {
   buildSyncPlan,
+  executeSyncPlan,
   scanVaults,
   type ConfigItem,
   type SyncPlan,
+  type SyncResult,
   type VaultInfo,
 } from '@/lib/api/vault_service';
 import Card from '@/lib/infa_s5_candidates/card.svelte';
@@ -14,6 +15,7 @@ import Section from '@/lib/infa_s5_candidates/section.svelte';
 import ScanVaults from './scan_vaults.svelte';
 import SelectScopeStep from './steps/select_scope_step.svelte';
 import SelectVaultsStep from './steps/select_vaults_step.svelte';
+import SyncResultStep from './steps/sync_result_step.svelte';
 import SyncPlanStep from './steps/sync_plan_step.svelte';
 import StepNav from '@/lib/components/step_nav.svelte';
 
@@ -42,11 +44,23 @@ let selectedPaths = $state<string[]>([]);
 let syncPlan = $state<SyncPlan | null>(null);
 let planLoading = $state(false);
 let planError = $state('');
-let startupError = $state('');
+let syncResult = $state<SyncResult | null>(null);
+let syncing = $state(false);
+let executeError = $state('');
+let devPresetError = $state('');
 
 let currentStep = $derived(steps[stepIndex]!);
-let canBack = $derived(stepIndex > 0);
+let canBack = $derived(stepIndex > 0 && !syncing);
 let canNext = $derived(getCanNext());
+let nextLabel = $derived(
+  currentStep.key === 'plan'
+    ? syncing
+      ? '正在同步…'
+      : '确认同步'
+    : currentStep.key === 'result'
+      ? '完成'
+      : '下一步',
+);
 
 const setScannedVaults = (selectedRoot: string, foundVaults: VaultInfo[]) => {
   root = selectedRoot;
@@ -64,18 +78,21 @@ const setMainVault = (vault: VaultInfo) => {
   selectedPaths = [];
   syncPlan = null;
   planError = '';
+  syncResult = null;
+  executeError = '';
 };
 
-// 开发环境按本机预设自动进入同步范围。
+// 开发环境按本机预设进入同步范围。
 const applyDevPreset = async () => {
-  if (!import.meta.env.DEV || import.meta.env.VITE_DEV_AUTO_ENTER_M3 !== 'true') {
+  if (!import.meta.env.DEV) {
     return;
   }
 
+  devPresetError = '';
   const devRoot = import.meta.env.VITE_DEV_VAULT_ROOT;
   const devMainVault = import.meta.env.VITE_DEV_MAIN_VAULT;
   if (!devRoot || !devMainVault) {
-    startupError = '开发启动预设缺少 vault 根目录或主库路径';
+    devPresetError = '开发预设缺少 vault 根目录或主库路径';
     return;
   }
 
@@ -95,14 +112,10 @@ const applyDevPreset = async () => {
 
     stepIndex = 2;
   } catch (err) {
-    startupError = err instanceof Error ? err.message : String(err);
+    devPresetError = err instanceof Error ? err.message : String(err);
     stepIndex = 0;
   }
 };
-
-onMount(() => {
-  void applyDevPreset();
-});
 
 const toggleTargetVault = (vault: VaultInfo) => {
   if (mainVault?.path === vault.path) {
@@ -122,15 +135,41 @@ const goBack = () => {
 };
 
 const goNext = async () => {
-  if (canNext && stepIndex < steps.length - 1) {
-    if (currentStep.key === 'scope') {
-      await loadSyncPlan();
-      if (!syncPlan) {
-        return;
-      }
-    }
-    stepIndex += 1;
+  if (!canNext) {
+    return;
   }
+
+  if (currentStep.key === 'result') {
+    finishSync();
+    return;
+  }
+
+  if (currentStep.key === 'scope') {
+    await loadSyncPlan();
+    if (!syncPlan) {
+      return;
+    }
+  }
+  if (currentStep.key === 'plan') {
+    await executePlan();
+    if (!syncResult) {
+      return;
+    }
+  }
+  stepIndex += 1;
+};
+
+// 完成本轮同步，保留扫描结果并清空后续步骤状态。
+const finishSync = () => {
+  mainVault = null;
+  targetVaults = [];
+  configItems = [];
+  selectedPaths = [];
+  syncPlan = null;
+  planError = '';
+  syncResult = null;
+  executeError = '';
+  stepIndex = 0;
 };
 
 const loadSyncPlan = async () => {
@@ -154,6 +193,23 @@ const loadSyncPlan = async () => {
   }
 };
 
+const executePlan = async () => {
+  if (!syncPlan) {
+    return;
+  }
+
+  syncing = true;
+  executeError = '';
+  syncResult = null;
+  try {
+    syncResult = await executeSyncPlan(syncPlan);
+  } catch (err) {
+    executeError = err instanceof Error ? err.message : String(err);
+  } finally {
+    syncing = false;
+  }
+};
+
 function getCanNext(): boolean {
   if (currentStep.key === 'scan') {
     return vaults.length > 0;
@@ -167,7 +223,11 @@ function getCanNext(): boolean {
     return selectedPaths.length > 0;
   }
 
-  return false;
+  if (currentStep.key === 'plan') {
+    return Boolean(syncPlan && !syncing);
+  }
+
+  return Boolean(syncResult);
 }
 </script>
 
@@ -181,14 +241,19 @@ function getCanNext(): boolean {
         <Section>
           <!-- infa-s5: <Card> -->
           <Card>
-            {#if startupError}
-              <p class="status-error startup-error">{startupError}</p>
+            {#if devPresetError}
+              <p class="status-error dev-preset-error">{devPresetError}</p>
             {/if}
 
             <!-- <section class="step-body">：页面区块已由 Section 负责。 -->
             <div class="step-body">
               {#if currentStep.key === 'scan'}
-                <ScanVaults {root} {vaults} onScanned={setScannedVaults} />
+                <ScanVaults
+                  {root}
+                  {vaults}
+                  onScanned={setScannedVaults}
+                  onDevPreset={applyDevPreset}
+                />
               {:else if currentStep.key === 'vaults'}
                 <SelectVaultsStep
                   {vaults}
@@ -207,6 +272,11 @@ function getCanNext(): boolean {
                 />
               {:else if currentStep.key === 'plan'}
                 <SyncPlanStep plan={syncPlan} loading={planLoading} error={planError} />
+                {#if executeError}
+                  <p class="status-error execute-error">{executeError}</p>
+                {/if}
+              {:else if currentStep.key === 'result' && syncResult}
+                <SyncResultStep result={syncResult} />
               {:else}
                 <div class="pending-step">
                   <h2>{currentStep.label}</h2>
@@ -217,8 +287,10 @@ function getCanNext(): boolean {
             <!-- </section> -->
 
             <div class="footer">
-              <Button onclick={goBack} disabled={!canBack}>上一步</Button>
-              <Button onclick={goNext} disabled={!canNext}>下一步</Button>
+              {#if currentStep.key !== 'result'}
+                <Button onclick={goBack} disabled={!canBack}>上一步</Button>
+              {/if}
+              <Button onclick={goNext} disabled={!canNext}>{nextLabel}</Button>
             </div>
           </Card>
           <!-- infa-s5: </Card> -->
@@ -246,8 +318,12 @@ function getCanNext(): boolean {
     min-height: 360px;
   }
 
-  .startup-error {
+  .dev-preset-error {
     margin-bottom: var(--space-4);
+  }
+
+  .execute-error {
+    margin-top: var(--space-4);
   }
 
   .pending-step {

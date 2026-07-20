@@ -1,0 +1,7 @@
+{
+  "id": "open-in-new-tab",
+  "name": "Open in New Tab (vault3 target)",
+  "version": "0.0.1-target",
+  "minAppVersion": "1.0.0",
+  "description": "vault3 的测试插件清单"
+}

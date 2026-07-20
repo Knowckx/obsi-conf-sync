@@ -1,0 +1,4 @@
+/* vault3 的同名片段，用于覆盖测试 */
+.table-cell {
+  padding: 16px;
+}

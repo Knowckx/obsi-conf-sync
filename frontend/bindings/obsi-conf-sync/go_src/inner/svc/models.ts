@@ -134,6 +134,34 @@ export class SyncRequest {
 }
 
 /**
+ * SyncResult 描述一次同步的执行结果。
+ */
+export class SyncResult {
+    "targets": TargetSyncResult[];
+
+    /** Creates a new SyncResult instance. */
+    constructor($$source: Partial<SyncResult> = {}) {
+        if (!("targets" in $$source)) {
+            this["targets"] = [];
+        }
+
+        Object.assign(this, $$source);
+    }
+
+    /**
+     * Creates a new SyncResult instance from a string or object.
+     */
+    static createFrom($$source: any = {}): SyncResult {
+        const $$createField0_0 = $$createType4;
+        let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
+        if ("targets" in $$parsedSource) {
+            $$parsedSource["targets"] = $$createField0_0($$parsedSource["targets"]);
+        }
+        return new SyncResult($$parsedSource as Partial<SyncResult>);
+    }
+}
+
+/**
  * TargetSyncPlan 描述单个目标库的同步计划。
  */
 export class TargetSyncPlan {
@@ -185,6 +213,54 @@ export class TargetSyncPlan {
 }
 
 /**
+ * TargetSyncResult 描述单个目标库的执行结果。
+ */
+export class TargetSyncResult {
+    "vaultPath": string;
+    "created": string[];
+    "overwrote": string[];
+    "errors": string[];
+
+    /** Creates a new TargetSyncResult instance. */
+    constructor($$source: Partial<TargetSyncResult> = {}) {
+        if (!("vaultPath" in $$source)) {
+            this["vaultPath"] = "";
+        }
+        if (!("created" in $$source)) {
+            this["created"] = [];
+        }
+        if (!("overwrote" in $$source)) {
+            this["overwrote"] = [];
+        }
+        if (!("errors" in $$source)) {
+            this["errors"] = [];
+        }
+
+        Object.assign(this, $$source);
+    }
+
+    /**
+     * Creates a new TargetSyncResult instance from a string or object.
+     */
+    static createFrom($$source: any = {}): TargetSyncResult {
+        const $$createField1_0 = $$createType2;
+        const $$createField2_0 = $$createType2;
+        const $$createField3_0 = $$createType2;
+        let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
+        if ("created" in $$parsedSource) {
+            $$parsedSource["created"] = $$createField1_0($$parsedSource["created"]);
+        }
+        if ("overwrote" in $$parsedSource) {
+            $$parsedSource["overwrote"] = $$createField2_0($$parsedSource["overwrote"]);
+        }
+        if ("errors" in $$parsedSource) {
+            $$parsedSource["errors"] = $$createField3_0($$parsedSource["errors"]);
+        }
+        return new TargetSyncResult($$parsedSource as Partial<TargetSyncResult>);
+    }
+}
+
+/**
  * VaultInfo 表示扫描发现的 Obsidian vault。
  */
 export class VaultInfo {
@@ -216,3 +292,5 @@ export class VaultInfo {
 const $$createType0 = TargetSyncPlan.createFrom;
 const $$createType1 = $Create.Array($$createType0);
 const $$createType2 = $Create.Array($Create.Any);
+const $$createType3 = TargetSyncResult.createFrom;
+const $$createType4 = $Create.Array($$createType3);

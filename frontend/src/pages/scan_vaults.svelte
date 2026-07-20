@@ -8,11 +8,13 @@ type Props = {
   root?: string;
   vaults?: VaultInfo[];
   onScanned?: (root: string, vaults: VaultInfo[]) => void;
+  onDevPreset?: () => void | Promise<void>;
 };
 
-let { root = '', vaults = [], onScanned = () => {} }: Props = $props();
+let { root = '', vaults = [], onScanned = () => {}, onDevPreset = () => {} }: Props = $props();
 let error = $state('');
 let scanning = $state(false);
+let applyingDevPreset = $state(false);
 
 const chooseAndScan = async () => {
   error = '';
@@ -42,13 +44,29 @@ const chooseAndScan = async () => {
 const getErrMsg = (err: unknown): string => {
   return err instanceof Error ? err.message : String(err);
 };
+
+const applyDevPreset = async () => {
+  applyingDevPreset = true;
+  try {
+    await onDevPreset();
+  } finally {
+    applyingDevPreset = false;
+  }
+};
 </script>
 
 <div class="step-content">
   <div class="toolbar">
-    <Button onclick={chooseAndScan} disabled={scanning}>
-      {scanning ? '扫描中' : '选择目录'}
-    </Button>
+    <div class="actions">
+      <Button onclick={chooseAndScan} disabled={scanning}>
+        {scanning ? '扫描中' : '选择目录'}
+      </Button>
+      {#if import.meta.env.DEV}
+        <Button onclick={applyDevPreset} disabled={applyingDevPreset}>
+          {applyingDevPreset ? '正在进入 M3…' : '开发：快速进入 M3'}
+        </Button>
+      {/if}
+    </div>
     <Input value={root} readonly placeholder="未选择目录" />
   </div>
 
@@ -67,9 +85,18 @@ const getErrMsg = (err: unknown): string => {
     align-items: center;
   }
 
+  .actions {
+    display: flex;
+    gap: var(--space-2);
+  }
+
   @media (max-width: 640px) {
     .toolbar {
       grid-template-columns: 1fr;
+    }
+
+    .actions {
+      flex-wrap: wrap;
     }
   }
 </style>

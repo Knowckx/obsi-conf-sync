@@ -10,6 +10,8 @@ export {
     ConfigItem,
     SyncPlan,
     SyncRequest,
+    SyncResult,
     TargetSyncPlan,
+    TargetSyncResult,
     VaultInfo
 } from "./models.js";

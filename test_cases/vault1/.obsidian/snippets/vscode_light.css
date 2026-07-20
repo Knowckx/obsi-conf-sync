@@ -1,0 +1,59 @@
+/* =======================================================
+   编辑模式：代码块外框、背景与左边线 (已合并并增加 padding)
+   ======================================================= */
+.markdown-source-view.mod-cm6 .cm-line.HyperMD-codeblock {
+    background: #f6f8fa !important;
+    color: #000000 !important;
+    border-left: 3px solid #d0d7de !important;
+    padding-left: 8px !important; /* 让代码与左边线保持合理间距 */
+}
+
+/* 编辑模式：注释 */
+.markdown-source-view.mod-cm6 .cm-comment {
+    color: #008000 !important;
+    font-style: normal !important;
+}
+
+/* 编辑模式：通用字符串 (如行内代码等) */
+.markdown-source-view.mod-cm6 .cm-string {
+    color: #a31515 !important;
+    font-style: normal !important;
+}
+
+/* 编辑模式：变量 */
+.markdown-source-view .cm-hmd-codeblock.cm-variable,
+.markdown-source-view .cm-hmd-codeblock.cm-variable-2,
+.markdown-source-view .cm-hmd-codeblock.cm-variable-3,
+.markdown-source-view .cm-hmd-codeblock.cm-variableName {
+    color: #001080 !important;
+}
+
+/* =======================================================
+   编辑模式：限制在代码块内的操作符 / 标点 (已修正，防止污染正文)
+   ======================================================= */
+.markdown-source-view.mod-cm6 .cm-hmd-codeblock.cm-operator,
+.markdown-source-view.mod-cm6 .cm-hmd-codeblock.cm-punctuation {
+    color: #000000 !important;
+    font-style: normal !important;
+}
+
+/* 命令与关键字 (如 git, rm) */
+.markdown-source-view .cm-hmd-codeblock.cm-keyword,
+.markdown-source-view .cm-hmd-codeblock.cm-builtin,
+.markdown-source-view .cm-hmd-codeblock.cm-def {
+    color: #795e26 !important;
+}
+
+/* 参数选项 (如 --depth=1, -rf) */
+.markdown-source-view .cm-hmd-codeblock.cm-attribute,
+.markdown-source-view .cm-hmd-codeblock.cm-property,
+.markdown-source-view .cm-hmd-codeblock.cm-meta,
+.markdown-source-view .cm-hmd-codeblock.cm-number {
+    color: #0000FF !important;
+}
+
+/* 代码块内的路径与参数字符串 (如 repo, repo/.git) */
+.markdown-source-view .cm-hmd-codeblock.cm-string,
+.markdown-source-view .cm-hmd-codeblock.cm-string-2 {
+    color: #800000 !important; /* 这里也可以考虑统一为上面的 #a31515，根据喜好决定 */
+}

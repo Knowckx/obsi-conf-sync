@@ -1,0 +1,195 @@
+{
+  "main": {
+    "id": "59f2b2ad17441240",
+    "type": "split",
+    "children": [
+      {
+        "id": "3b6fbf15616e2907",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "0bc0ff4686027441",
+            "type": "leaf",
+            "pinned": true,
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "98_用户资料/temp.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": false
+              },
+              "pinned": true,
+              "icon": "lucide-file",
+              "title": "temp"
+            }
+          },
+          {
+            "id": "8a9a8bad2168e3a4",
+            "type": "leaf",
+            "pinned": true,
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "98_用户资料/1.QDII分析/1.指数基金.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": false
+              },
+              "pinned": true,
+              "icon": "lucide-file",
+              "title": "1.指数基金"
+            }
+          }
+        ],
+        "currentTab": 1
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "05d77acab70c286b",
+    "type": "split",
+    "children": [
+      {
+        "id": "3ba322cd143e9e65",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "0705e720e7757a95",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "文件列表"
+            }
+          },
+          {
+            "id": "868f0e3013a71333",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "Alpha",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "搜索"
+            }
+          },
+          {
+            "id": "1e5e5e2b14910d5d",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "书签"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "03f73acda193d419",
+    "type": "split",
+    "children": [
+      {
+        "id": "c538da96972f0302",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "6879a8d92aab6b99",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "标签"
+            }
+          },
+          {
+            "id": "772d396081e70639",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "98_用户资料/1.QDII分析/1.指数基金.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "1.指数基金 的大纲"
+            }
+          }
+        ],
+        "currentTab": 1
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "workspaces:管理工作区布局": false,
+      "switcher:打开快速切换": false,
+      "command-palette:打开命令面板": false
+    }
+  },
+  "active": "8a9a8bad2168e3a4",
+  "lastOpenFiles": [
+    "98_用户资料/1.QDII分析/3.数据接口调研.md",
+    "98_用户资料/1.QDII分析/1.指数基金.md",
+    "98_用户资料/temp.md",
+    "98_用户资料/未命名.md",
+    "98_用户资料/1.QDII分析/原油持仓分析.md",
+    "98_用户资料/1.QDII分析/旧基金列表.md",
+    "98_用户资料/1.QDII分析/基金持仓分析汇总.md",
+    "98_用户资料/1.QDII分析/2.QDII记录表.md",
+    "98_用户资料/1.QDII分析/持仓分析/501312 海外科技.md",
+    "98_用户资料/1.QDII分析/持仓分析/164824 工银印度基金.md",
+    "98_用户资料/1.QDII分析/持仓分析/14 ai提示词 - 持仓分析.md",
+    "90_skills/qmt接口整理/xt_data_api.md",
+    "90_skills/qmt接口整理/xt_trade_api.md",
+    "02_规范/04_项目编码约定.md",
+    "98_用户资料/估值逻辑文档/3.估值验证记录.md",
+    "98_用户资料/1.QDII分析/持仓分析/12.基金估值误差跟踪表.md",
+    "98_用户资料/估值逻辑文档/6.实时估值TODO.md",
+    "03_架构/模块/估值中心.md",
+    "98_用户资料/1.QDII分析/持仓分析/指数基金.md",
+    "08_待办/待推进事项.md",
+    "98_用户资料/说明.md",
+    "03_架构/未命名.md",
+    "03_架构/系统架构.md",
+    "90_skills/skill_qmt_grpc/SKILL.md",
+    "90_skills/skill_qmt_grpc/说明.md",
+    "02_规范/03_python开发约定.md",
+    "90_skills/qmt接口整理",
+    "90_skills/qmt接口研究",
+    "98_用户资料/未命名",
+    "98_用户资料/估值逻辑文档",
+    "z开发笔记/5 新架构设计",
+    "ai_doc/1.dev/refactor_recode",
+    "ai_doc/6.user_docs/6.QDII基金列表",
+    "z开发笔记/2.AI编程经验",
+    "z开发笔记/3.Tick策略Todo",
+    "z开发笔记"
+  ]
+}

@@ -1,0 +1,37 @@
+/* 
+只需要影响 编辑模式，阅读模式我们不会用
+.markdown-source-view  对应的 Markdown 源码/编辑视图
+.mod-cm6：Obsidian 使用 CodeMirror 6 编辑器的视图
+*/
+
+/* 
+    原理 在编辑视图中 Obsidian Live Preview 默认会在表格前加一个空行 <br> 来满足渲染规则
+    这空行在编辑模式下会被包装成一个块级元素，从而产生明显 gap
+    编辑模式：压缩表格前的空白行 
+*/
+.markdown-source-view.mod-cm6
+.cm-line:has(> br):has(+ .cm-embed-block.cm-table-widget) {
+  line-height: 0 !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+
+/* 对不同的标题 设置与正文第一行的间距 */
+.markdown-source-view.mod-cm6 .cm-line.HyperMD-header-1 {
+  padding-bottom: 0.25em;
+}
+.markdown-source-view.mod-cm6 .cm-line.HyperMD-header-2 {
+  padding-bottom: 0.2em;
+}
+.markdown-source-view.mod-cm6 .cm-line.HyperMD-header-3 {
+  padding-bottom: 0.15em;
+}
+
+.markdown-source-view.mod-cm6 .cm-line.HyperMD-header-4,
+.markdown-source-view.mod-cm6 .cm-line.HyperMD-header-5 {
+  padding-bottom: 0.1em;
+}
+
+
