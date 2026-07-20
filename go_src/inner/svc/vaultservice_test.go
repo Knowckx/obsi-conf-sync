@@ -1,13 +1,14 @@
 package svc_test
 
 import (
+	"path/filepath"
 	"testing"
 
 	"obsi-conf-sync/go_src/inner/svc"
 )
 
 func Test_ScanVaults(t *testing.T) {
-	testPath := `D:\AsukaFiles\AsuObsidianStore`
+	testPath := filepath.Join("..", "..", "..", "test_cases")
 
 	service := &svc.VaultService{}
 	result, err := service.ScanVaults(testPath)

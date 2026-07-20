@@ -1,0 +1,2 @@
+vault3 target fixture: themes is intentionally a file.
+It conflicts with the themes directory in vault1.
