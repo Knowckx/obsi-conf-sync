@@ -210,6 +210,63 @@ export class SyncResult {
 }
 
 /**
+ * SyncResultItem 描述单个同步项的执行结果。
+ */
+export class SyncResultItem {
+    "path": string;
+    "status": SyncResultStatus;
+    "error": string;
+
+    /** Creates a new SyncResultItem instance. */
+    constructor($$source: Partial<SyncResultItem> = {}) {
+        if (!("path" in $$source)) {
+            this["path"] = "";
+        }
+        if (!("status" in $$source)) {
+            this["status"] = SyncResultStatus.$zero;
+        }
+        if (!("error" in $$source)) {
+            this["error"] = "";
+        }
+
+        Object.assign(this, $$source);
+    }
+
+    /**
+     * Creates a new SyncResultItem instance from a string or object.
+     */
+    static createFrom($$source: any = {}): SyncResultItem {
+        let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
+        return new SyncResultItem($$parsedSource as Partial<SyncResultItem>);
+    }
+}
+
+/**
+ * SyncResultStatus 描述单个同步项的最终结果。
+ */
+export enum SyncResultStatus {
+    /**
+     * The Go zero value for the underlying type of the enum.
+     */
+    $zero = "",
+
+    /**
+     * SyncResultStatusCreated 表示新增配置成功。
+     */
+    SyncResultStatusCreated = "created",
+
+    /**
+     * SyncResultStatusOverwrote 表示覆盖配置成功。
+     */
+    SyncResultStatusOverwrote = "overwrote",
+
+    /**
+     * SyncResultStatusFailed 表示同步失败。
+     */
+    SyncResultStatusFailed = "failed",
+};
+
+/**
  * TargetSyncPlan 描述单个目标库的同步计划。
  */
 export class TargetSyncPlan {
@@ -253,23 +310,15 @@ export class TargetSyncPlan {
  */
 export class TargetSyncResult {
     "vaultPath": string;
-    "created": string[];
-    "overwrote": string[];
-    "errors": string[];
+    "items": SyncResultItem[];
 
     /** Creates a new TargetSyncResult instance. */
     constructor($$source: Partial<TargetSyncResult> = {}) {
         if (!("vaultPath" in $$source)) {
             this["vaultPath"] = "";
         }
-        if (!("created" in $$source)) {
-            this["created"] = [];
-        }
-        if (!("overwrote" in $$source)) {
-            this["overwrote"] = [];
-        }
-        if (!("errors" in $$source)) {
-            this["errors"] = [];
+        if (!("items" in $$source)) {
+            this["items"] = [];
         }
 
         Object.assign(this, $$source);
@@ -279,18 +328,10 @@ export class TargetSyncResult {
      * Creates a new TargetSyncResult instance from a string or object.
      */
     static createFrom($$source: any = {}): TargetSyncResult {
-        const $$createField1_0 = $$createType2;
-        const $$createField2_0 = $$createType2;
-        const $$createField3_0 = $$createType2;
+        const $$createField1_0 = $$createType8;
         let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
-        if ("created" in $$parsedSource) {
-            $$parsedSource["created"] = $$createField1_0($$parsedSource["created"]);
-        }
-        if ("overwrote" in $$parsedSource) {
-            $$parsedSource["overwrote"] = $$createField2_0($$parsedSource["overwrote"]);
-        }
-        if ("errors" in $$parsedSource) {
-            $$parsedSource["errors"] = $$createField3_0($$parsedSource["errors"]);
+        if ("items" in $$parsedSource) {
+            $$parsedSource["items"] = $$createField1_0($$parsedSource["items"]);
         }
         return new TargetSyncResult($$parsedSource as Partial<TargetSyncResult>);
     }
@@ -332,3 +373,5 @@ const $$createType3 = TargetSyncResult.createFrom;
 const $$createType4 = $Create.Array($$createType3);
 const $$createType5 = SyncPlanItem.createFrom;
 const $$createType6 = $Create.Array($$createType5);
+const $$createType7 = SyncResultItem.createFrom;
+const $$createType8 = $Create.Array($$createType7);

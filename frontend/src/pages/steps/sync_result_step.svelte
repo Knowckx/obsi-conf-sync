@@ -1,22 +1,39 @@
 <script lang="ts">
-import type { SyncResult } from '@/lib/api/vault_service';
+import {
+  SyncResultStatus,
+  type SyncResult,
+  type SyncResultItem,
+} from '@/lib/api/vault_service';
 
 type Props = {
   result?: SyncResult | null;
 };
 
 let { result = null }: Props = $props();
-let totalCreated = $derived(result?.targets.reduce((total, target) => total + target.created.length, 0) ?? 0);
-let totalOverwrote = $derived(
-  result?.targets.reduce((total, target) => total + target.overwrote.length, 0) ?? 0,
-);
-let totalErrors = $derived(result?.targets.reduce((total, target) => total + target.errors.length, 0) ?? 0);
+
+const countStatus = (items: SyncResultItem[], status: SyncResultStatus) => {
+  return items.filter((item) => item.status === status).length;
+};
+
+const totalStatus = (status: SyncResultStatus) => {
+  return result?.targets.reduce((total, target) => total + countStatus(target.items, status), 0) ?? 0;
+};
+
+const statusLabel = (status: SyncResultStatus) => {
+  if (status === SyncResultStatus.SyncResultStatusCreated) {
+    return '新增成功';
+  }
+  if (status === SyncResultStatus.SyncResultStatusOverwrote) {
+    return '覆盖成功';
+  }
+  return '失败';
+};
 </script>
 
 <div class="step-content">
   <div class="header">
     <div>
-      <h2>{totalErrors > 0 ? '同步完成，但有失败项' : '同步完成'}</h2>
+      <h2>{totalStatus(SyncResultStatus.SyncResultStatusFailed) > 0 ? '同步完成，但有失败项' : '同步完成'}</h2>
       <p>以下是本次同步的实际执行结果。</p>
     </div>
   </div>
@@ -26,71 +43,54 @@ let totalErrors = $derived(result?.targets.reduce((total, target) => total + tar
   {:else}
     <div class="summary">
       <div class="summary-item created-summary">
-        <strong>{totalCreated}</strong>
-        <span>新增配置</span>
+        <strong>{totalStatus(SyncResultStatus.SyncResultStatusCreated)}</strong>
+        <span>新增成功</span>
       </div>
       <div class="summary-item overwrite-summary">
-        <strong>{totalOverwrote}</strong>
-        <span>覆盖配置</span>
+        <strong>{totalStatus(SyncResultStatus.SyncResultStatusOverwrote)}</strong>
+        <span>覆盖成功</span>
       </div>
-      <div class:error-summary={totalErrors > 0} class="summary-item">
-        <strong>{totalErrors}</strong>
-        <span>失败项</span>
+      <div class:error-summary={totalStatus(SyncResultStatus.SyncResultStatusFailed) > 0} class="summary-item">
+        <strong>{totalStatus(SyncResultStatus.SyncResultStatusFailed)}</strong>
+        <span>失败</span>
       </div>
     </div>
 
     <div class="target-list">
       {#each result.targets as target (target.vaultPath)}
         <section class="target-card">
-          <h3 title={target.vaultPath}>{target.vaultPath}</h3>
-
-          <div class="result-columns">
-            <div class="result-group created-group">
-              <h4>新增 <span>{target.created.length}</span></h4>
-              {#if target.created.length === 0}
-                <p class="muted empty-state">暂无新增项</p>
-              {:else}
-                <ul>
-                  {#each target.created as path}
-                    <li class="result-item">
-                      <span class="status-icon" aria-hidden="true">✅</span>
-                      <span>{path}</span>
-                    </li>
-                  {/each}
-                </ul>
-              {/if}
+          <div class="target-header">
+            <div class="target-context">
+              <span class="target-role">目标库</span>
+              <h3 title={target.vaultPath}>{target.vaultPath}</h3>
             </div>
-
-            <div class="result-group overwrite-group">
-              <h4>覆盖 <span>{target.overwrote.length}</span></h4>
-              {#if target.overwrote.length === 0}
-                <p class="muted empty-state">暂无覆盖项</p>
-              {:else}
-                <ul>
-                  {#each target.overwrote as path}
-                    <li class="result-item">
-                      <span class="status-icon" aria-hidden="true">✅</span>
-                      <span>{path}</span>
-                    </li>
-                  {/each}
-                </ul>
-              {/if}
+            <div class="target-summary">
+              <span><strong>{countStatus(target.items, SyncResultStatus.SyncResultStatusCreated)}</strong> 项新增成功</span>
+              <span><strong>{countStatus(target.items, SyncResultStatus.SyncResultStatusOverwrote)}</strong> 项覆盖成功</span>
+              <span><strong>{countStatus(target.items, SyncResultStatus.SyncResultStatusFailed)}</strong> 项失败</span>
             </div>
           </div>
 
-          {#if target.errors.length > 0}
-            <div class="errors">
-              <h4>失败项 <span>{target.errors.length}</span></h4>
-              <ul>
-                {#each target.errors as error}
-                  <li class="result-item">
-                    <span class="status-icon" aria-hidden="true">❌</span>
-                    <span>{error}</span>
-                  </li>
-                {/each}
-              </ul>
-            </div>
-          {/if}
+          <ul class="result-list">
+            {#each target.items as item (item.path)}
+              <li class="result-item">
+                <div class="item-content">
+                  <span class="item-path">{item.path}</span>
+                  {#if item.status === SyncResultStatus.SyncResultStatusFailed && item.error}
+                    <span class="item-error">{item.error}</span>
+                  {/if}
+                </div>
+                <span
+                  class="status-badge"
+                  class:created-status={item.status === SyncResultStatus.SyncResultStatusCreated}
+                  class:overwrite-status={item.status === SyncResultStatus.SyncResultStatusOverwrote}
+                  class:failed-status={item.status === SyncResultStatus.SyncResultStatusFailed}
+                >
+                  {statusLabel(item.status)}
+                </span>
+              </li>
+            {/each}
+          </ul>
         </section>
       {/each}
     </div>
@@ -100,21 +100,19 @@ let totalErrors = $derived(result?.targets.reduce((total, target) => total + tar
 <style>
   .header,
   .target-list,
-  .target-card,
-  .result-group,
-  .errors {
+  .target-card {
     display: grid;
     gap: var(--space-3);
   }
 
   h2,
   h3,
-  h4,
   p {
     margin: 0;
   }
 
-  p {
+  p,
+  .muted {
     color: var(--color-text-muted);
   }
 
@@ -143,18 +141,15 @@ let totalErrors = $derived(result?.targets.reduce((total, target) => total + tar
     font-size: var(--font-size-sm);
   }
 
-  .created-summary strong,
-  .created-group h4 {
+  .created-summary strong {
+    color: var(--color-success);
+  }
+
+  .overwrite-summary strong {
     color: var(--color-primary-text);
   }
 
-  .overwrite-summary strong,
-  .overwrite-group h4 {
-    color: var(--color-text);
-  }
-
-  .error-summary strong,
-  .errors h4 {
+  .error-summary strong {
     color: var(--color-danger);
   }
 
@@ -165,97 +160,134 @@ let totalErrors = $derived(result?.targets.reduce((total, target) => total + tar
     background: var(--color-surface);
   }
 
-  h3 {
-    padding: var(--space-4);
+  .target-header {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-4);
+    align-items: center;
     border-bottom: 1px solid var(--color-border-subtle);
     background: var(--color-surface-muted);
-    overflow-wrap: anywhere;
-  }
-
-  .result-columns {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .result-group {
-    align-content: start;
     padding: var(--space-4);
   }
 
-  .result-group + .result-group {
-    border-left: 1px solid var(--color-border-subtle);
-  }
-
-  h4 {
+  .target-context {
     display: flex;
     gap: var(--space-2);
     align-items: center;
+    min-width: 0;
   }
 
-  h4 span {
+  .target-role,
+  .target-summary span {
+    flex: none;
+    padding: 3px var(--space-2);
+    border-radius: var(--radius-round);
+    font-size: var(--font-size-sm);
+  }
+
+  .target-role {
+    background: var(--color-primary-bg);
+    color: var(--color-primary-text);
+    font-weight: 500;
+  }
+
+  h3 {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .target-summary {
+    display: flex;
+    gap: var(--space-2);
+    flex: none;
     color: var(--color-text-muted);
     font-size: var(--font-size-sm);
-    font-weight: 400;
   }
 
-  ul {
+  .target-summary span {
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-control);
+    background: var(--color-surface);
+  }
+
+  .target-summary strong {
+    margin-right: var(--space-1);
+    color: var(--color-text);
+  }
+
+  .result-list {
     display: grid;
     gap: var(--space-2);
     margin: 0;
-    padding: 0;
+    padding: var(--space-4);
     list-style: none;
-  }
-
-  li {
-    padding: 9px var(--space-3);
-    border: 1px solid var(--color-border-subtle);
-    border-radius: var(--radius-control);
-    background: var(--color-surface-muted);
-    color: var(--color-text-subtle);
-    overflow-wrap: anywhere;
   }
 
   .result-item {
     display: flex;
-    gap: var(--space-2);
+    justify-content: space-between;
+    gap: var(--space-3);
     align-items: flex-start;
+    padding: 9px var(--space-3);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-control);
+    background: var(--color-surface-muted);
   }
 
-  .status-icon {
-    flex: 0 0 auto;
-    line-height: inherit;
+  .item-content {
+    display: grid;
+    gap: var(--space-1);
+    min-width: 0;
   }
 
-  .created-group li {
+  .item-path {
+    overflow-wrap: anywhere;
+  }
+
+  .item-error {
+    color: var(--color-danger);
+    font-size: var(--font-size-sm);
+    overflow-wrap: anywhere;
+  }
+
+  .status-badge {
+    flex: none;
+    padding: 3px var(--space-2);
+    border-radius: var(--radius-round);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+  }
+
+  .created-status {
+    background: var(--color-success-bg);
+    color: var(--color-success);
+  }
+
+  .overwrite-status {
     background: var(--color-primary-bg);
     color: var(--color-primary-text);
   }
 
-  .errors {
-    padding: var(--space-4);
-    border-top: 1px solid var(--color-border-subtle);
-  }
-
-  .errors li {
-    border-color: color-mix(in srgb, var(--color-danger) 30%, var(--color-border));
-    background: color-mix(in srgb, var(--color-danger) 6%, var(--color-surface));
+  .failed-status {
+    background: color-mix(in srgb, var(--color-danger) 8%, var(--color-surface));
     color: var(--color-danger);
   }
 
-  .empty-state,
-  .muted {
-    color: var(--color-text-muted);
-  }
-
   @media (max-width: 640px) {
-    .summary,
-    .result-columns {
+    .summary {
       grid-template-columns: 1fr;
     }
 
-    .result-group + .result-group {
-      border-top: 1px solid var(--color-border-subtle);
-      border-left: 0;
+    .result-item {
+      display: grid;
+    }
+
+    .target-header {
+      display: grid;
+    }
+
+    .target-summary {
+      flex-wrap: wrap;
     }
   }
 </style>

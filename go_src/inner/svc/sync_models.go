@@ -44,10 +44,27 @@ type SyncResult struct {
 	Targets []TargetSyncResult `json:"targets"`
 }
 
+// SyncResultStatus 描述单个同步项的最终结果。
+type SyncResultStatus string
+
+const (
+	// SyncResultStatusCreated 表示新增配置成功。
+	SyncResultStatusCreated SyncResultStatus = "created"
+	// SyncResultStatusOverwrote 表示覆盖配置成功。
+	SyncResultStatusOverwrote SyncResultStatus = "overwrote"
+	// SyncResultStatusFailed 表示同步失败。
+	SyncResultStatusFailed SyncResultStatus = "failed"
+)
+
+// SyncResultItem 描述单个同步项的执行结果。
+type SyncResultItem struct {
+	Path   string           `json:"path"`
+	Status SyncResultStatus `json:"status"`
+	Error  string           `json:"error"`
+}
+
 // TargetSyncResult 描述单个目标库的执行结果。
 type TargetSyncResult struct {
-	VaultPath string   `json:"vaultPath"`
-	Created   []string `json:"created"`
-	Overwrote []string `json:"overwrote"`
-	Errors    []string `json:"errors"`
+	VaultPath string           `json:"vaultPath"`
+	Items     []SyncResultItem `json:"items"`
 }

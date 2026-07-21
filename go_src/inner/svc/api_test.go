@@ -78,23 +78,24 @@ func Test_CoreSyncRegression(t *testing.T) {
 	}
 
 	vault2Result := result.Targets[0]
-	assertPaths(t, "vault2.created", vault2Result.Created, []string{
-		"community-plugins.json", "snippets/", "themes/",
-		"plugins/open-in-new-tab/", "plugins/open-tab-settings/",
-	})
-	assertPaths(t, "vault2.overwrote", vault2Result.Overwrote, []string{"app.json"})
-	assertPaths(t, "vault2.errors", vault2Result.Errors, nil)
+	assertTargetResult(t, vault2Result, []svc.SyncResultStatus{
+		svc.SyncResultStatusOverwrote,
+		svc.SyncResultStatusCreated,
+		svc.SyncResultStatusCreated,
+		svc.SyncResultStatusCreated,
+		svc.SyncResultStatusCreated,
+		svc.SyncResultStatusCreated,
+	}, nil)
 
 	vault3Result := result.Targets[1]
-	assertPaths(t, "vault3.created", vault3Result.Created, []string{
-		"community-plugins.json", "plugins/open-tab-settings/",
-	})
-	assertPaths(t, "vault3.overwrote", vault3Result.Overwrote, []string{
-		"app.json", "snippets/", "plugins/open-in-new-tab/",
-	})
-	if len(vault3Result.Errors) != 1 || !strings.Contains(vault3Result.Errors[0], "themes") {
-		t.Fatalf("vault3.errors 不符合预期: %v", vault3Result.Errors)
-	}
+	assertTargetResult(t, vault3Result, []svc.SyncResultStatus{
+		svc.SyncResultStatusOverwrote,
+		svc.SyncResultStatusCreated,
+		svc.SyncResultStatusOverwrote,
+		svc.SyncResultStatusFailed,
+		svc.SyncResultStatusOverwrote,
+		svc.SyncResultStatusCreated,
+	}, []string{"", "", "", "themes", "", ""})
 
 	assertFileEqual(t, filepath.Join(mainVault, ".obsidian", "snippets", "table-spacing-fix.css"), filepath.Join(targetVault3, ".obsidian", "snippets", "table-spacing-fix.css"))
 	assertFileExists(t, filepath.Join(targetVault3, ".obsidian", "snippets", "vscode_light.css"))
@@ -172,6 +173,24 @@ func assertTargetPlan(t *testing.T, target svc.TargetSyncPlan, wantActions []svc
 	for i, item := range target.Items {
 		if item.Path != coreSyncSelectedPaths[i] || item.Action != wantActions[i] {
 			t.Errorf("%s 第 %d 项不符: want %s/%s, got %s/%s", target.VaultPath, i, coreSyncSelectedPaths[i], wantActions[i], item.Path, item.Action)
+		}
+	}
+}
+
+func assertTargetResult(t *testing.T, target svc.TargetSyncResult, wantStatuses []svc.SyncResultStatus, wantErrorParts []string) {
+	t.Helper()
+	if len(target.Items) != len(coreSyncSelectedPaths) {
+		t.Fatalf("%s 执行项数量不符: want %d, got %d", target.VaultPath, len(coreSyncSelectedPaths), len(target.Items))
+	}
+	for i, item := range target.Items {
+		if item.Path != coreSyncSelectedPaths[i] || item.Status != wantStatuses[i] {
+			t.Errorf("%s 第 %d 项不符: want %s/%s, got %s/%s", target.VaultPath, i, coreSyncSelectedPaths[i], wantStatuses[i], item.Path, item.Status)
+		}
+		if len(wantErrorParts) > 0 && !strings.Contains(item.Error, wantErrorParts[i]) {
+			t.Errorf("%s 第 %d 项错误不符: want 包含 %q, got %q", target.VaultPath, i, wantErrorParts[i], item.Error)
+		}
+		if len(wantErrorParts) == 0 && item.Error != "" {
+			t.Errorf("%s 第 %d 项不应有错误: %q", target.VaultPath, i, item.Error)
 		}
 	}
 }

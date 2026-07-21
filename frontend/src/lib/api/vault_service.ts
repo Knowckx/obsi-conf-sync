@@ -3,9 +3,10 @@ import {
   SyncPlanAction,
   SyncPlan as SyncPlanModel,
   SyncRequest as SyncRequestModel,
+  SyncResultStatus,
 } from '@bindings/obsi-conf-sync/go_src/inner/svc/models';
 
-export { SyncPlanAction };
+export { SyncPlanAction, SyncResultStatus };
 
 export type VaultInfo = {
   path: string;
@@ -43,11 +44,15 @@ export type SyncPlan = {
   targets: TargetSyncPlan[];
 };
 
+export type SyncResultItem = {
+  path: string;
+  status: SyncResultStatus;
+  error: string;
+};
+
 export type TargetSyncResult = {
   vaultPath: string;
-  created: string[];
-  overwrote: string[];
-  errors: string[];
+  items: SyncResultItem[];
 };
 
 export type SyncResult = {
@@ -64,6 +69,14 @@ export const listConfigItems = (vaultPath: string): Promise<ConfigItem[]> => {
 
 export const openVaultConfigDir = (vaultPath: string): Promise<void> => {
   return VaultService.OpenVaultConfigDir(vaultPath);
+};
+
+export const copyDirectory = (sourcePath: string, targetPath: string): Promise<void> => {
+  return VaultService.CopyDirectory(sourcePath, targetPath);
+};
+
+export const removeDirectory = (path: string): Promise<void> => {
+  return VaultService.RemoveDirectory(path);
 };
 
 export const buildSyncPlan = (request: SyncRequest): Promise<SyncPlan> => {

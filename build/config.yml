@@ -41,6 +41,7 @@ dev_mode:
       - node_modules
       - frontend
       - test_cases
+      - temp
       - bin
     file:
       - .DS_Store

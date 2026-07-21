@@ -36,8 +36,8 @@
 同步计划应包含：
 
 ```text
-覆盖：app.json
-新增：community-plugins.json、snippets、themes、plugins/open-in-new-tab、plugins/open-tab-settings
+覆盖1：app.json
+新增5：community-plugins.json、snippets、themes、plugins/open-in-new-tab、plugins/open-tab-settings
 ```
 
 执行结果应为：

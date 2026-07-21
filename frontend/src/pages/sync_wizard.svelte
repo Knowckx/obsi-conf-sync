@@ -2,7 +2,9 @@
 import { Button } from 'infa-s5';
 import {
   buildSyncPlan,
+  copyDirectory,
   executeSyncPlan,
+  removeDirectory,
   scanVaults,
   type ConfigItem,
   type SyncPlan,
@@ -42,6 +44,8 @@ const devSelectedPaths = [
   'plugins/open-in-new-tab/',
   'plugins/open-tab-settings/',
 ];
+const devSourceRoot = 'test_cases';
+const devTargetRoot = 'temp/test_cases_1';
 
 let stepIndex = $state(0);
 let root = $state('');
@@ -57,6 +61,7 @@ let syncResult = $state<SyncResult | null>(null);
 let syncing = $state(false);
 let executeError = $state('');
 let devPresetError = $state('');
+let devTestRoot = $state<string | null>(null);
 
 let currentStep = $derived(steps[stepIndex]!);
 let canBack = $derived(stepIndex > 0 && !syncing);
@@ -98,11 +103,14 @@ const applyDevPreset = async () => {
   }
 
   devPresetError = '';
-  const devRoot = 'test_cases';
 
   try {
-    const foundVaults = await scanVaults(devRoot);
-    setScannedVaults(devRoot, foundVaults);
+    await removeDirectory(devTargetRoot);
+    await copyDirectory(devSourceRoot, devTargetRoot);
+    devTestRoot = devTargetRoot;
+
+    const foundVaults = await scanVaults(devTargetRoot);
+    setScannedVaults(devTargetRoot, foundVaults);
 
     const selectedMainVault = foundVaults.find((vault) => vault.name === 'vault1');
     if (!selectedMainVault) {
@@ -117,6 +125,8 @@ const applyDevPreset = async () => {
     selectedPaths = [...devSelectedPaths];
     stepIndex = 2;
   } catch (err) {
+    await removeDirectory(devTargetRoot);
+    devTestRoot = null;
     devPresetError = err instanceof Error ? err.message : String(err);
     stepIndex = 0;
   }
@@ -145,7 +155,7 @@ const goNext = async () => {
   }
 
   if (currentStep.key === 'result') {
-    finishSync();
+    await finishSync();
     return;
   }
 
@@ -165,7 +175,11 @@ const goNext = async () => {
 };
 
 // 完成本轮同步，保留扫描结果并清空后续步骤状态。
-const finishSync = () => {
+const finishSync = async () => {
+  if (devTestRoot) {
+    await removeDirectory(devTestRoot);
+    devTestRoot = null;
+  }
   mainVault = null;
   targetVaults = [];
   configItems = [];

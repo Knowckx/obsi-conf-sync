@@ -13,6 +13,8 @@ export {
     SyncPlanItem,
     SyncRequest,
     SyncResult,
+    SyncResultItem,
+    SyncResultStatus,
     TargetSyncPlan,
     TargetSyncResult,
     VaultInfo

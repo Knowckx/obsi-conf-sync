@@ -26,23 +26,21 @@ func (t *VaultService) ExecuteSyncPlan(plan SyncPlan) (SyncResult, error) {
 	for i, target := range plan.Targets {
 		targetResult := TargetSyncResult{
 			VaultPath: targetVaultPaths[i],
-			Created:   make([]string, 0, len(target.Items)),
-			Overwrote: make([]string, 0, len(target.Items)),
-			Errors:    make([]string, 0),
+			Items:     make([]SyncResultItem, 0, len(target.Items)),
 		}
 
 		for _, item := range target.Items {
+			resultItem := SyncResultItem{
+				Path:   item.Path,
+				Status: resultStatusForAction(item.Action),
+			}
 			src := filepath.Join(mainVaultPath, ".obsidian", filepath.FromSlash(item.Path))
 			dst := filepath.Join(targetVaultPaths[i], ".obsidian", filepath.FromSlash(item.Path))
 			if err := copySyncItem(src, dst); err != nil {
-				targetResult.Errors = append(targetResult.Errors, errors.Wrapf(err, "同步配置失败: %s", item.Path).Error())
-				continue
+				resultItem.Status = SyncResultStatusFailed
+				resultItem.Error = errors.Wrapf(err, "同步配置失败: %s", item.Path).Error()
 			}
-			if item.Action == SyncPlanActionCreate {
-				targetResult.Created = append(targetResult.Created, item.Path)
-			} else {
-				targetResult.Overwrote = append(targetResult.Overwrote, item.Path)
-			}
+			targetResult.Items = append(targetResult.Items, resultItem)
 		}
 		result.Targets = append(result.Targets, targetResult)
 	}
@@ -76,6 +74,14 @@ func precheckSyncPlan(plan SyncPlan) (string, []string, error) {
 		targetVaultPaths = append(targetVaultPaths, targetVaultPath)
 	}
 	return mainVaultPath, targetVaultPaths, nil
+}
+
+// resultStatusForAction 将计划动作转换为成功时的结果状态。
+func resultStatusForAction(action SyncPlanAction) SyncResultStatus {
+	if action == SyncPlanActionCreate {
+		return SyncResultStatusCreated
+	}
+	return SyncResultStatusOverwrote
 }
 
 // precheckSyncPath 检查同步路径是否为 .obsidian 下的相对路径。
