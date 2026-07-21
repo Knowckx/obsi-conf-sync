@@ -1,5 +1,9 @@
 <script lang="ts">
-import type { SyncPlan } from '@/lib/api/vault_service';
+import {
+  SyncPlanAction,
+  type SyncPlan,
+  type SyncPlanItem,
+} from '@/lib/api/vault_service';
 
 type Props = {
   plan?: SyncPlan | null;
@@ -8,13 +12,17 @@ type Props = {
 };
 
 let { plan = null, loading = false, error = '' }: Props = $props();
+
+const countAction = (items: SyncPlanItem[], action: SyncPlanAction) => {
+  return items.filter((item) => item.action === action).length;
+};
 </script>
 
 <div class="step-content">
   <div class="header">
     <div>
       <h2>同步计划</h2>
-      <p>确认各目标库将要复制和跳过的配置项。</p>
+      <p>确认各目标库将要新增或覆盖的配置项。</p>
     </div>
   </div>
 
@@ -42,46 +50,25 @@ let { plan = null, loading = false, error = '' }: Props = $props();
               <h3 title={target.vaultPath}>{target.vaultPath}</h3>
             </div>
             <div class="target-summary">
-              <span><strong>{target.create.length}</strong> 项新增</span>
-              <span><strong>{target.overwrite.length}</strong> 项覆盖</span>
+              <span><strong>{countAction(target.items, SyncPlanAction.SyncPlanActionCreate)}</strong> 项新增</span>
+              <span><strong>{countAction(target.items, SyncPlanAction.SyncPlanActionOverwrite)}</strong> 项覆盖</span>
             </div>
           </div>
 
-          <div class="plan-columns">
-            <div class="plan-group create-group">
-              <div class="group-title">
-                <span class="group-marker" aria-hidden="true"></span>
-                <h4>新增配置</h4>
-                <span class="count">{target.create.length}</span>
-              </div>
-              {#if target.create.length === 0}
-                <p class="muted empty-state">没有需要新增的配置</p>
-              {:else}
-                <ul class="path-list">
-                  {#each target.create as path}
-                    <li>{path}</li>
-                  {/each}
-                </ul>
-              {/if}
-            </div>
-
-            <div class="plan-group overwrite-group">
-              <div class="group-title">
-                <span class="group-marker" aria-hidden="true"></span>
-                <h4>覆盖现有配置</h4>
-                <span class="count">{target.overwrite.length}</span>
-              </div>
-              {#if target.overwrite.length === 0}
-                <p class="muted empty-state">没有需要覆盖的配置</p>
-              {:else}
-                <ul class="path-list">
-                  {#each target.overwrite as path}
-                    <li>{path}</li>
-                  {/each}
-                </ul>
-              {/if}
-            </div>
-          </div>
+          <ul class="plan-list">
+            {#each target.items as item (item.path)}
+              <li>
+                <span class="item-path">{item.path}</span>
+                <span
+                  class="action-badge"
+                  class:create-action={item.action === SyncPlanAction.SyncPlanActionCreate}
+                  class:overwrite-action={item.action === SyncPlanAction.SyncPlanActionOverwrite}
+                >
+                  {item.action === SyncPlanAction.SyncPlanActionCreate ? '新增' : '覆盖'}
+                </span>
+              </li>
+            {/each}
+          </ul>
         </section>
       {/each}
     </div>
@@ -91,8 +78,7 @@ let { plan = null, loading = false, error = '' }: Props = $props();
 <style>
   .header,
   .target-list,
-  .target-card,
-  .plan-group {
+  .target-card {
     display: grid;
     gap: var(--space-3);
   }
@@ -142,7 +128,6 @@ let { plan = null, loading = false, error = '' }: Props = $props();
 
   h2,
   h3,
-  h4,
   p {
     margin: 0;
   }
@@ -176,7 +161,7 @@ let { plan = null, loading = false, error = '' }: Props = $props();
   }
 
   .target-role,
-  .count {
+  .action-badge {
     flex: none;
     padding: 3px var(--space-2);
     border-radius: var(--radius-round);
@@ -215,78 +200,41 @@ let { plan = null, loading = false, error = '' }: Props = $props();
     color: var(--color-text);
   }
 
-  .plan-columns {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .plan-group {
-    align-content: start;
-    padding: var(--space-4);
-  }
-
-  .plan-group + .plan-group {
-    border-left: 1px solid var(--color-border-subtle);
-  }
-
-  .group-title {
-    display: flex;
-    gap: var(--space-2);
-    align-items: center;
-  }
-
-  .group-marker {
-    width: 8px;
-    height: 8px;
-    border-radius: var(--radius-round);
-  }
-
-  .create-group .group-marker {
-    background: var(--color-primary);
-  }
-
-  .overwrite-group .group-marker {
-    background: var(--color-danger);
-  }
-
-  .count {
-    background: var(--color-surface-muted);
-    color: var(--color-text-muted);
-    font-weight: 400;
-  }
-
-  .path-list {
+  .plan-list {
     display: grid;
     gap: var(--space-2);
     margin: 0;
-    padding: 0;
+    padding: 0 var(--space-4) var(--space-4);
     list-style: none;
   }
 
-  .path-list li {
+  .plan-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+    align-items: center;
     padding: 9px var(--space-3);
     border: 1px solid var(--color-border-subtle);
     border-radius: var(--radius-control);
     background: var(--color-surface-muted);
     color: var(--color-text-subtle);
+  }
+
+  .item-path {
+    min-width: 0;
     overflow-wrap: anywhere;
   }
 
-  .create-group .path-list li {
-    border-color: var(--color-border);
-    background: var(--color-primary-bg);
-    color: var(--color-primary-text);
+  .create-action {
+    background: var(--color-success-bg);
+    color: var(--color-success);
+    font-weight: 500;
   }
 
-  .overwrite-group .path-list li {
-    color: var(--color-text);
-  }
-
-  .empty-state {
-    padding: var(--space-3);
-    border: 1px dashed var(--color-border);
-    border-radius: var(--radius-control);
-    text-align: center;
+  .overwrite-action {
+    background: var(--color-surface);
+    color: var(--color-danger);
+    font-weight: 500;
   }
 
   .muted {
@@ -302,13 +250,8 @@ let { plan = null, loading = false, error = '' }: Props = $props();
       flex-wrap: wrap;
     }
 
-    .plan-columns {
-      grid-template-columns: 1fr;
-    }
-
-    .plan-group + .plan-group {
-      border-top: 1px solid var(--color-border-subtle);
-      border-left: 0;
+    .plan-list li {
+      align-items: flex-start;
     }
   }
 </style>

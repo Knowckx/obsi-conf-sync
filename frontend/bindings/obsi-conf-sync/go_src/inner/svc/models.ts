@@ -86,6 +86,54 @@ export class SyncPlan {
 }
 
 /**
+ * SyncPlanAction 描述同步项将在目标库执行的动作。
+ */
+export enum SyncPlanAction {
+    /**
+     * The Go zero value for the underlying type of the enum.
+     */
+    $zero = "",
+
+    /**
+     * SyncPlanActionCreate 表示目标库中不存在该配置项。
+     */
+    SyncPlanActionCreate = "create",
+
+    /**
+     * SyncPlanActionOverwrite 表示目标库中已经存在该配置项。
+     */
+    SyncPlanActionOverwrite = "overwrite",
+};
+
+/**
+ * SyncPlanItem 描述单个配置项的同步计划。
+ */
+export class SyncPlanItem {
+    "path": string;
+    "action": SyncPlanAction;
+
+    /** Creates a new SyncPlanItem instance. */
+    constructor($$source: Partial<SyncPlanItem> = {}) {
+        if (!("path" in $$source)) {
+            this["path"] = "";
+        }
+        if (!("action" in $$source)) {
+            this["action"] = SyncPlanAction.$zero;
+        }
+
+        Object.assign(this, $$source);
+    }
+
+    /**
+     * Creates a new SyncPlanItem instance from a string or object.
+     */
+    static createFrom($$source: any = {}): SyncPlanItem {
+        let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
+        return new SyncPlanItem($$parsedSource as Partial<SyncPlanItem>);
+    }
+}
+
+/**
  * SyncRequest 描述一次同步计划请求。
  */
 export class SyncRequest {
@@ -171,25 +219,17 @@ export class TargetSyncPlan {
     "vaultPath": string;
 
     /**
-     * 目标库中尚不存在的配置路径
+     * 按主库选择顺序排列的同步项
      */
-    "create": string[];
-
-    /**
-     * 目标库中已经存在的配置路径
-     */
-    "overwrite": string[];
+    "items": SyncPlanItem[];
 
     /** Creates a new TargetSyncPlan instance. */
     constructor($$source: Partial<TargetSyncPlan> = {}) {
         if (!("vaultPath" in $$source)) {
             this["vaultPath"] = "";
         }
-        if (!("create" in $$source)) {
-            this["create"] = [];
-        }
-        if (!("overwrite" in $$source)) {
-            this["overwrite"] = [];
+        if (!("items" in $$source)) {
+            this["items"] = [];
         }
 
         Object.assign(this, $$source);
@@ -199,14 +239,10 @@ export class TargetSyncPlan {
      * Creates a new TargetSyncPlan instance from a string or object.
      */
     static createFrom($$source: any = {}): TargetSyncPlan {
-        const $$createField1_0 = $$createType2;
-        const $$createField2_0 = $$createType2;
+        const $$createField1_0 = $$createType6;
         let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
-        if ("create" in $$parsedSource) {
-            $$parsedSource["create"] = $$createField1_0($$parsedSource["create"]);
-        }
-        if ("overwrite" in $$parsedSource) {
-            $$parsedSource["overwrite"] = $$createField2_0($$parsedSource["overwrite"]);
+        if ("items" in $$parsedSource) {
+            $$parsedSource["items"] = $$createField1_0($$parsedSource["items"]);
         }
         return new TargetSyncPlan($$parsedSource as Partial<TargetSyncPlan>);
     }
@@ -294,3 +330,5 @@ const $$createType1 = $Create.Array($$createType0);
 const $$createType2 = $Create.Array($Create.Any);
 const $$createType3 = TargetSyncResult.createFrom;
 const $$createType4 = $Create.Array($$createType3);
+const $$createType5 = SyncPlanItem.createFrom;
+const $$createType6 = $Create.Array($$createType5);

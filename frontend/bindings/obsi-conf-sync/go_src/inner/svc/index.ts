@@ -9,6 +9,8 @@ export {
 export {
     ConfigItem,
     SyncPlan,
+    SyncPlanAction,
+    SyncPlanItem,
     SyncRequest,
     SyncResult,
     TargetSyncPlan,

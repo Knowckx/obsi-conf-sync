@@ -15,14 +15,28 @@ type SyncPlan struct {
 	Targets       []TargetSyncPlan `json:"targets"`
 }
 
+// SyncPlanAction 描述同步项将在目标库执行的动作。
+type SyncPlanAction string
+
+const (
+	// SyncPlanActionCreate 表示目标库中不存在该配置项。
+	SyncPlanActionCreate SyncPlanAction = "create"
+	// SyncPlanActionOverwrite 表示目标库中已经存在该配置项。
+	SyncPlanActionOverwrite SyncPlanAction = "overwrite"
+)
+
+// SyncPlanItem 描述单个配置项的同步计划。
+type SyncPlanItem struct {
+	Path   string         `json:"path"`
+	Action SyncPlanAction `json:"action"`
+}
+
 // TargetSyncPlan 描述单个目标库的同步计划。
 type TargetSyncPlan struct {
 	// 当前目标库的绝对路径
 	VaultPath string `json:"vaultPath"`
-	// 目标库中尚不存在的配置路径
-	Create []string `json:"create"`
-	// 目标库中已经存在的配置路径
-	Overwrite []string `json:"overwrite"`
+	// 按主库选择顺序排列的同步项
+	Items []SyncPlanItem `json:"items"`
 }
 
 // SyncResult 描述一次同步的执行结果。

@@ -20,20 +20,25 @@ func (s *VaultService) BuildSyncPlan(req SyncRequest) (SyncPlan, error) {
 		return SyncPlan{}, errors.WithStack(err)
 	}
 
-	selectedPaths := make(map[string]struct{}, len(req.SelectedPaths))
+	selectedPaths := make([]string, 0, len(req.SelectedPaths))
+	selectedPathSet := make(map[string]struct{}, len(req.SelectedPaths))
 	for _, path := range req.SelectedPaths {
 		path = normalizeSyncPath(path)
 		if path == "" {
 			return SyncPlan{}, errors.New("同步配置路径不能为空")
 		}
-		selectedPaths[path] = struct{}{}
+		if _, exists := selectedPathSet[path]; exists {
+			continue
+		}
+		selectedPathSet[path] = struct{}{}
+		selectedPaths = append(selectedPaths, path)
 	}
 
 	knownPaths := make(map[string]struct{}, len(configItems))
 	for _, item := range configItems {
 		knownPaths[normalizeSyncPath(item.Path)] = struct{}{}
 	}
-	for path := range selectedPaths {
+	for _, path := range selectedPaths {
 		if _, ok := knownPaths[path]; !ok {
 			return SyncPlan{}, errors.Errorf("主库不存在配置项: %s", path)
 		}
@@ -49,28 +54,20 @@ func (s *VaultService) BuildSyncPlan(req SyncRequest) (SyncPlan, error) {
 			return SyncPlan{}, errors.Errorf("主库不能作为从库: %s", targetVaultPath)
 		}
 
-		createPaths := make([]string, 0, len(selectedPaths))
-		overwritePaths := make([]string, 0, len(selectedPaths))
-		for _, item := range configItems {
-			path := normalizeSyncPath(item.Path)
-			if _, ok := selectedPaths[path]; !ok {
-				continue
-			}
-
+		items := make([]SyncPlanItem, 0, len(selectedPaths))
+		for _, path := range selectedPaths {
 			_, err := os.Stat(filepath.Join(targetVaultPath, ".obsidian", filepath.FromSlash(path)))
+			action := SyncPlanActionCreate
 			if err == nil {
-				overwritePaths = append(overwritePaths, path)
-				continue
-			}
-			if !os.IsNotExist(err) {
+				action = SyncPlanActionOverwrite
+			} else if !os.IsNotExist(err) {
 				return SyncPlan{}, errors.Wrapf(err, "检查目标配置项失败: %s", path)
 			}
-			createPaths = append(createPaths, path)
+			items = append(items, SyncPlanItem{Path: path, Action: action})
 		}
 		targets = append(targets, TargetSyncPlan{
 			VaultPath: targetVaultPath,
-			Create:    createPaths,
-			Overwrite: overwritePaths,
+			Items:     items,
 		})
 	}
 

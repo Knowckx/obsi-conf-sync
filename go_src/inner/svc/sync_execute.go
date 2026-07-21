@@ -26,13 +26,24 @@ func (t *VaultService) ExecuteSyncPlan(plan SyncPlan) (SyncResult, error) {
 	for i, target := range plan.Targets {
 		targetResult := TargetSyncResult{
 			VaultPath: targetVaultPaths[i],
-			Created:   make([]string, 0, len(target.Create)),
-			Overwrote: make([]string, 0, len(target.Overwrite)),
+			Created:   make([]string, 0, len(target.Items)),
+			Overwrote: make([]string, 0, len(target.Items)),
 			Errors:    make([]string, 0),
 		}
 
-		executeSyncPaths(mainVaultPath, targetVaultPaths[i], target.Create, &targetResult.Created, &targetResult.Errors)
-		executeSyncPaths(mainVaultPath, targetVaultPaths[i], target.Overwrite, &targetResult.Overwrote, &targetResult.Errors)
+		for _, item := range target.Items {
+			src := filepath.Join(mainVaultPath, ".obsidian", filepath.FromSlash(item.Path))
+			dst := filepath.Join(targetVaultPaths[i], ".obsidian", filepath.FromSlash(item.Path))
+			if err := copySyncItem(src, dst); err != nil {
+				targetResult.Errors = append(targetResult.Errors, errors.Wrapf(err, "同步配置失败: %s", item.Path).Error())
+				continue
+			}
+			if item.Action == SyncPlanActionCreate {
+				targetResult.Created = append(targetResult.Created, item.Path)
+			} else {
+				targetResult.Overwrote = append(targetResult.Overwrote, item.Path)
+			}
+		}
 		result.Targets = append(result.Targets, targetResult)
 	}
 	return result, nil
@@ -54,8 +65,11 @@ func precheckSyncPlan(plan SyncPlan) (string, []string, error) {
 		if samePath(mainVaultPath, targetVaultPath) {
 			return "", nil, errors.Errorf("主库不能作为从库: %s", targetVaultPath)
 		}
-		for _, path := range append(target.Create, target.Overwrite...) {
-			if err := precheckSyncPath(path); err != nil {
+		for _, item := range target.Items {
+			if item.Action != SyncPlanActionCreate && item.Action != SyncPlanActionOverwrite {
+				return "", nil, errors.Errorf("无效的同步动作: %s", item.Action)
+			}
+			if err := precheckSyncPath(item.Path); err != nil {
 				return "", nil, err
 			}
 		}
@@ -71,19 +85,6 @@ func precheckSyncPath(path string) error {
 		return errors.Errorf("无效的同步配置路径: %s", path)
 	}
 	return nil
-}
-
-// executeSyncPaths 依次复制配置项并记录结果。
-func executeSyncPaths(mainVaultPath string, targetVaultPath string, paths []string, succeeded *[]string, errMsgs *[]string) {
-	for _, path := range paths {
-		src := filepath.Join(mainVaultPath, ".obsidian", filepath.FromSlash(path))
-		dst := filepath.Join(targetVaultPath, ".obsidian", filepath.FromSlash(path))
-		if err := copySyncItem(src, dst); err != nil {
-			*errMsgs = append(*errMsgs, errors.Wrapf(err, "同步配置失败: %s", path).Error())
-			continue
-		}
-		*succeeded = append(*succeeded, path)
-	}
 }
 
 // copySyncItem 将单个文件或目录覆盖复制到目标路径。

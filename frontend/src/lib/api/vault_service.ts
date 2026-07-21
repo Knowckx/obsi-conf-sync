@@ -1,8 +1,11 @@
 import { VaultService } from '@bindings/obsi-conf-sync/go_src/inner/svc';
 import {
+  SyncPlanAction,
   SyncPlan as SyncPlanModel,
   SyncRequest as SyncRequestModel,
 } from '@bindings/obsi-conf-sync/go_src/inner/svc/models';
+
+export { SyncPlanAction };
 
 export type VaultInfo = {
   path: string;
@@ -25,10 +28,14 @@ export type SyncRequest = {
   selectedPaths: string[];
 };
 
+export type SyncPlanItem = {
+  path: string;
+  action: SyncPlanAction;
+};
+
 export type TargetSyncPlan = {
   vaultPath: string;
-  create: string[];
-  overwrite: string[];
+  items: SyncPlanItem[];
 };
 
 export type SyncPlan = {

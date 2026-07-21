@@ -52,14 +52,21 @@ func Test_CoreSyncRegression(t *testing.T) {
 		t.Fatalf("目标库数量不符: want 2, got %d", len(plan.Targets))
 	}
 
-	assertTargetPlan(t, plan.Targets[0], []string{
-		"community-plugins.json", "snippets/", "themes/",
-		"plugins/open-in-new-tab/", "plugins/open-tab-settings/",
-	}, []string{"app.json"})
-	assertTargetPlan(t, plan.Targets[1], []string{
-		"community-plugins.json", "plugins/open-tab-settings/",
-	}, []string{
-		"app.json", "snippets/", "themes/", "plugins/open-in-new-tab/",
+	assertTargetPlan(t, plan.Targets[0], []svc.SyncPlanAction{
+		svc.SyncPlanActionOverwrite,
+		svc.SyncPlanActionCreate,
+		svc.SyncPlanActionCreate,
+		svc.SyncPlanActionCreate,
+		svc.SyncPlanActionCreate,
+		svc.SyncPlanActionCreate,
+	})
+	assertTargetPlan(t, plan.Targets[1], []svc.SyncPlanAction{
+		svc.SyncPlanActionOverwrite,
+		svc.SyncPlanActionCreate,
+		svc.SyncPlanActionOverwrite,
+		svc.SyncPlanActionOverwrite,
+		svc.SyncPlanActionOverwrite,
+		svc.SyncPlanActionCreate,
 	})
 
 	result, err := service.ExecuteSyncPlan(plan)
@@ -157,10 +164,16 @@ func assertContainsPaths(t *testing.T, got []string, want []string) {
 	}
 }
 
-func assertTargetPlan(t *testing.T, target svc.TargetSyncPlan, wantCreate []string, wantOverwrite []string) {
+func assertTargetPlan(t *testing.T, target svc.TargetSyncPlan, wantActions []svc.SyncPlanAction) {
 	t.Helper()
-	assertPaths(t, target.VaultPath+".create", target.Create, wantCreate)
-	assertPaths(t, target.VaultPath+".overwrite", target.Overwrite, wantOverwrite)
+	if len(target.Items) != len(coreSyncSelectedPaths) {
+		t.Fatalf("%s 同步项数量不符: want %d, got %d", target.VaultPath, len(coreSyncSelectedPaths), len(target.Items))
+	}
+	for i, item := range target.Items {
+		if item.Path != coreSyncSelectedPaths[i] || item.Action != wantActions[i] {
+			t.Errorf("%s 第 %d 项不符: want %s/%s, got %s/%s", target.VaultPath, i, coreSyncSelectedPaths[i], wantActions[i], item.Path, item.Action)
+		}
+	}
 }
 
 func assertPaths(t *testing.T, name string, got []string, want []string) {
