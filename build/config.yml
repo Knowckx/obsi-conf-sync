@@ -40,6 +40,7 @@ dev_mode:
       - .git
       - node_modules
       - frontend
+      - test_cases
       - bin
     file:
       - .DS_Store
