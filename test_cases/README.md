@@ -16,9 +16,9 @@
 
    ```text
    app.json
-   community-plugins.json
    snippets/
    themes
+   community-plugins.json
    plugins/open-in-new-tab/
    plugins/open-tab-settings/
    ```
