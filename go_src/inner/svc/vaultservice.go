@@ -85,43 +85,6 @@ func (s *VaultService) OpenVaultConfigDir(vaultPath string) error {
 	return nil
 }
 
-// CopyDirectory 将 sourcePath 目录整体复制到 targetPath。
-func (s *VaultService) CopyDirectory(sourcePath string, targetPath string) error {
-	sourcePath, err := precheckScanRoot(sourcePath)
-	if err != nil {
-		return errors.WithStack(err)
-	}
-	targetPath, err = absoluteDirectoryPath(targetPath)
-	if err != nil {
-		return errors.WithStack(err)
-	}
-	if samePath(sourcePath, targetPath) {
-		return errors.New("源目录和目标目录不能相同")
-	}
-	if _, err := os.Stat(targetPath); err == nil {
-		return errors.Errorf("目标目录已存在: %s", targetPath)
-	} else if !os.IsNotExist(err) {
-		return errors.WithStack(err)
-	}
-
-	if err := copyDirectory(sourcePath, targetPath); err != nil {
-		return errors.WithStack(err)
-	}
-	return nil
-}
-
-// RemoveDirectory 删除 path 指定的目录。
-func (s *VaultService) RemoveDirectory(path string) error {
-	path, err := absoluteDirectoryPath(path)
-	if err != nil {
-		return errors.WithStack(err)
-	}
-	if err := os.RemoveAll(path); err != nil {
-		return errors.WithStack(err)
-	}
-	return nil
-}
-
 // precheckScanRoot 检查扫描根目录并返回绝对路径。
 func precheckScanRoot(root string) (string, error) {
 	rootPath, err := absoluteDirectoryPath(root)
@@ -145,32 +108,6 @@ func absoluteDirectoryPath(path string) (string, error) {
 		return "", errors.New("目录路径不能为空")
 	}
 	return filepath.Abs(path)
-}
-
-// copyDirectory 复制目录内容并保留文件、目录权限。
-func copyDirectory(sourcePath string, targetPath string) error {
-	return filepath.WalkDir(sourcePath, func(path string, entry os.DirEntry, walkErr error) error {
-		if walkErr != nil {
-			return walkErr
-		}
-		relPath, err := filepath.Rel(sourcePath, path)
-		if err != nil {
-			return err
-		}
-		destinationPath := filepath.Join(targetPath, relPath)
-		if entry.IsDir() {
-			info, err := entry.Info()
-			if err != nil {
-				return err
-			}
-			return os.MkdirAll(destinationPath, info.Mode())
-		}
-		info, err := entry.Info()
-		if err != nil {
-			return err
-		}
-		return copySyncFile(path, destinationPath, info.Mode())
-	})
 }
 
 // precheckVaultPath 检查 vault 路径并返回绝对路径。

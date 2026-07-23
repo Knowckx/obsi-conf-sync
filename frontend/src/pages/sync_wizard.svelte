@@ -2,9 +2,9 @@
 import { Button } from 'infa-s5';
 import {
   buildSyncPlan,
-  copyDirectory,
   executeSyncPlan,
   removeDirectory,
+  resetTestCases,
   scanVaults,
   type ConfigItem,
   type SyncPlan,
@@ -44,7 +44,6 @@ const devSelectedPaths = [
   'plugins/open-in-new-tab/',
   'plugins/open-tab-settings/',
 ];
-const devSourceRoot = 'test_cases';
 const devTargetRoot = 'temp/test_cases_1';
 
 let stepIndex = $state(0);
@@ -105,8 +104,7 @@ const applyDevPreset = async () => {
   devPresetError = '';
 
   try {
-    await removeDirectory(devTargetRoot);
-    await copyDirectory(devSourceRoot, devTargetRoot);
+    await resetTestCases();
     devTestRoot = devTargetRoot;
 
     const foundVaults = await scanVaults(devTargetRoot);
@@ -125,7 +123,7 @@ const applyDevPreset = async () => {
     selectedPaths = [...devSelectedPaths];
     stepIndex = 2;
   } catch (err) {
-    await removeDirectory(devTargetRoot);
+    await removeDirectory();
     devTestRoot = null;
     devPresetError = err instanceof Error ? err.message : String(err);
     stepIndex = 0;
@@ -177,7 +175,7 @@ const goNext = async () => {
 // 完成本轮同步，保留扫描结果并清空后续步骤状态。
 const finishSync = async () => {
   if (devTestRoot) {
-    await removeDirectory(devTestRoot);
+    await removeDirectory();
     devTestRoot = null;
   }
   mainVault = null;

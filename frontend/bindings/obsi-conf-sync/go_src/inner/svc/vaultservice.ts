@@ -24,13 +24,6 @@ export function BuildSyncPlan(req: $models.SyncRequest): $CancellablePromise<$mo
 }
 
 /**
- * CopyDirectory 将 sourcePath 目录整体复制到 targetPath。
- */
-export function CopyDirectory(sourcePath: string, targetPath: string): $CancellablePromise<void> {
-    return $Call.ByID(2291088348, sourcePath, targetPath);
-}
-
-/**
  * ExecuteSyncPlan 执行覆盖同步；已有同步任务运行时拒绝新的调用。
  */
 export function ExecuteSyncPlan(plan: $models.SyncPlan): $CancellablePromise<$models.SyncResult> {
@@ -53,13 +46,6 @@ export function ListConfigItems(vaultPath: string): $CancellablePromise<$models.
  */
 export function OpenVaultConfigDir(vaultPath: string): $CancellablePromise<void> {
     return $Call.ByID(132513533, vaultPath);
-}
-
-/**
- * RemoveDirectory 删除 path 指定的目录。
- */
-export function RemoveDirectory(path: string): $CancellablePromise<void> {
-    return $Call.ByID(3020866711, path);
 }
 
 /**

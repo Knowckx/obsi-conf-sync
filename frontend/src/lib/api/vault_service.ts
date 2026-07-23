@@ -1,4 +1,4 @@
-import { VaultService } from '@bindings/obsi-conf-sync/go_src/inner/svc';
+import { DevService, VaultService } from '@bindings/obsi-conf-sync/go_src/inner/svc';
 import {
   SyncPlanAction,
   SyncPlan as SyncPlanModel,
@@ -71,12 +71,12 @@ export const openVaultConfigDir = (vaultPath: string): Promise<void> => {
   return VaultService.OpenVaultConfigDir(vaultPath);
 };
 
-export const copyDirectory = (sourcePath: string, targetPath: string): Promise<void> => {
-  return VaultService.CopyDirectory(sourcePath, targetPath);
+export const resetTestCases = (): Promise<void> => {
+  return DevService.ResetTestCases();
 };
 
-export const removeDirectory = (path: string): Promise<void> => {
-  return VaultService.RemoveDirectory(path);
+export const removeDirectory = (): Promise<void> => {
+  return DevService.RemoveDirectory();
 };
 
 export const buildSyncPlan = (request: SyncRequest): Promise<SyncPlan> => {
